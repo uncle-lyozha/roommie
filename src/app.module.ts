@@ -7,6 +7,7 @@ import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { CalendModule } from './calend/calend.module';
 import { SchedulersModule } from './schedulers/schedulers.module';
+import { ScenesModule } from './scenes/scenes.module';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { SchedulersModule } from './schedulers/schedulers.module';
         DbModule,
         CalendModule,
         SchedulersModule,
+        ScenesModule,
     ],
     controllers: [AppController],
     providers: [AppService],

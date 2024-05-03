@@ -16,6 +16,9 @@ export class User {
 
     @Prop()
     rating: number;
+    
+    @Prop()
+    storyStep: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,0 +1,126 @@
+{
+    "mon": {
+        "msg": [
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczMp29_9o72WhrLcy2blXfBRluPZ3RBRXk2PcNB23BRqbxfZx-6uAP44ij7OCwNNbsdhDSSCbGBIbphKY_0kEQ7QvHlE_cTtYPHI9D_mmPBShNKS7nVRRcSmF8lrunWQqZDlfBkZ7vKMSZE1b6ViOGW2GA=w300-h199-s-no-gm?authuser=0"
+            },
+            {
+                "type": "text",
+                "message": "Cpt Dallas: \nAccording to the ship's schedule you were assigned to watch duty in the "
+            }
+        ],
+        "buttons": [
+            {
+                "reply": "dall-m",
+                "text": "Assignment received.",
+                "nextStep": "thu"
+            }
+        ]
+    },
+    "mon-g": {
+        "msg": [
+            {
+                "type": "text",
+                "message": "Cpt Dallas: \nAccording to the ship's schedule you were assigned to watch duty in the Galley (kitchen). It's a tough shift, you have to continiously perform your duties until Sunday."
+            },
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczMp29_9o72WhrLcy2blXfBRluPZ3RBRXk2PcNB23BRqbxfZx-6uAP44ij7OCwNNbsdhDSSCbGBIbphKY_0kEQ7QvHlE_cTtYPHI9D_mmPBShNKS7nVRRcSmF8lrunWQqZDlfBkZ7vKMSZE1b6ViOGW2GA=w300-h199-s-no-gm?authuser=0"
+            }
+        ],
+        "buttons": [
+            {
+                "text": "Assignment received.",
+                "nextStep": "thu-g",
+                "reply": "dall-m-g"
+            }
+        ]
+    },
+    "thu": {
+        "msg": [
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0"
+            },
+            {
+                "type": "text",
+                "message": "Ripley: \nThis is Warrant officer Ellen Ripley here, how is your watch? All good?"
+            }
+        ],
+        "buttons": [
+            {
+                "text": "Report to the captain: all done!",
+                "nextStep": "fin",
+                "reply": "rip-d"
+            },
+            {
+                "text": "Still in progress, need more time.",
+                "nextStep": "fri",
+                "reply": "rip-sn"
+            }
+        ]
+    },
+    "thu-g": {
+        "msg": [
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0"
+            },
+            {
+                "type": "text",
+                "message": "Ripley: \nThis is Warrant officer Ellen Ripley here, how is your shift in the Galley? We all know it's tough in there. Let me know if you need a hand."
+            }
+        ],
+        "buttons": [
+            {
+                "text": "It's fine, I got this.",
+                "nextStep": "sun-g",
+                "reply": "rip-sn"
+            },
+            {
+                "text": "Actually, I might use some help in here.",
+                "nextStep": "sun-g",
+                "reply": "rip-h"
+            }
+        ]
+    },
+    "sun": {
+        "msg": [
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczOFzgIfHHNxYS6FwmmJVPmmdcxZDtIkPRjCQv9pVz0n7jXuSdMHKncF4vILK5MKeItg9JbDWL2QGuRMbhCqXgnUMmFwC-zvTrM2SkRT_vgwX8XHdTpXjjyd36R0s804eo1V8SeWvZukoyENU3Zlv-VdVg=w200-h279-s-no-gm?authuser=0"
+            },
+            {
+                "type": "text",
+                "message": "Kane: \nExecutive officer Kane online, I see you still haven't complete your watch. Please hurry up, the beer is waiting."
+            }
+        ],
+        "buttons": [
+            {
+                "text": "No more snoozes, the job is done.",
+                "nextStep": "fin",
+                "reply": "kane-d"
+            }
+        ]
+    },
+    "sun-g": {
+        "msg": [
+            {
+                "type": "image",
+                "src": "https://lh3.googleusercontent.com/pw/AP1GczOFzgIfHHNxYS6FwmmJVPmmdcxZDtIkPRjCQv9pVz0n7jXuSdMHKncF4vILK5MKeItg9JbDWL2QGuRMbhCqXgnUMmFwC-zvTrM2SkRT_vgwX8XHdTpXjjyd36R0s804eo1V8SeWvZukoyENU3Zlv-VdVg=w200-h279-s-no-gm?authuser=0"
+            },
+            {
+                "type": "text",
+                "message": "Kane: \nExecutive officer Kane online, your watch in the Galley is over. Well done, take a rest and have that beer."
+            }
+        ],
+        "buttons": [
+            {
+                "text": "Report to the captain: all done!",
+                "nextStep": "fin",
+                "reply": "kane-d"
+            }
+        ]
+    }
+}

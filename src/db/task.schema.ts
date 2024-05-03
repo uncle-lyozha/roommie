@@ -25,5 +25,8 @@ export class Task {
 
     @Prop({required: true})
     snoozedTimes: number;
+
+    @Prop({required: true})
+    storyStep: string;
 }
 export const TaskSchema = SchemaFactory.createForClass(Task);

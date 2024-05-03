@@ -1,21 +1,23 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { CalendService } from "src/calend/calend.service";
 import { DbService } from "src/db/db.service";
+import { CleaningQuest } from "src/scenes/cleaning.scene";
 
 @Injectable()
 export class SchedulersService {
     constructor(
-        private readonly calendar: CalendService,
         private readonly db: DbService,
+        private readonly storyScene: CleaningQuest,
     ) {}
 
-    @Cron(CronExpression.EVERY_10_SECONDS, { timeZone: "Europe/Belgrade" })
+    @Cron(CronExpression.EVERY_MINUTE, { timeZone: "Europe/Belgrade" })
     async handleCron() {
-        console.log("10 sec.");
-        // const calendar = await this.calendar.getCalendarData()
-        // console.log(calendar)
-        const newTasks = await this.db.populateTasks();
-        console.log(newTasks);
+        // console.log("Test.");
+        // await this.db.setFailedTaskStatuses();
+        // await this.db.populateTasks();
+        const newTasks = await this.db.getNewTasks();
+        for (const task of newTasks) {
+            await this.storyScene.enter(task);
+        }
     }
 }
