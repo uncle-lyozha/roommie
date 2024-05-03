@@ -4,6 +4,9 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 export class Room {
     @Prop({ required: true })
     roomName: string;
+    
+    @Prop({ required: true })
+    roomDesc: string;
 
     @Prop({ type: [{ type: String }] })
     users: string[];

@@ -10,24 +10,18 @@ import {
     TelegrafContextType,
     Update,
 } from "nestjs-telegraf";
+import { DbService } from "src/db/db.service";
 import { Context, Scenes, Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/typings/scenes";
 
 @Injectable()
 @Update()
 export class BotService {
-    constructor(@InjectBot() private readonly bot: Telegraf<SceneContext>) {
-        // this.bot.telegram.setMyCommands([
-        //     {
-        //         command: "/help",
-        //         description: "Help.",
-        //     },
-        //     {
-        //         command: "/addNewRoom",
-        //         description:
-        //             "Add a new room for cleaning and maintain a schedule there.",
-        //     },
-        // ]);
+    constructor(
+        @InjectBot() private readonly bot: Telegraf<SceneContext>,
+        private readonly db: DbService,
+    ) {
+        this.initializeBotCommands();
     }
 
     @Start()
@@ -50,9 +44,9 @@ export class BotService {
         await ctx.reply("Hey there 👋");
     }
 
-    @Command("addNewRoom")
+    @Command("add_new_room")
     async startScene(@Ctx() ctx: SceneContext) {
-        await ctx.scene.enter("addNewRoom");
+        await ctx.scene.enter("addnewroom");
     }
 
     @Hears(["dice", "Dice", "кинь кости", "кости", "кубики"])
@@ -60,6 +54,11 @@ export class BotService {
         const diceMsg = await ctx.replyWithDice();
         const diceValue = diceMsg.dice.value;
         console.log(diceValue);
+    }
+
+    @Command("create_tasks")
+    async creatTasks() {
+        await this.db.createTasks();
     }
 
     @Command("scene")
@@ -75,5 +74,25 @@ export class BotService {
         }
 
         // Other handler logic...
+    }
+
+    async initializeBotCommands() {
+        try {
+            const commands = [
+                { command: "start", description: "Start the bot" },
+                { command: "help", description: "Get help" },
+                {
+                    command: "add_new_room",
+                    description: "Add a new room for cleaning.",
+                },
+                {
+                    command: "create_tasks",
+                    description: "Create tasks for all rooms.",
+                },
+            ];
+            await this.bot.telegram.setMyCommands(commands);
+        } catch (error) {
+            console.error("Error setting bot commands:", error);
+        }
     }
 }

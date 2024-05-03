@@ -10,45 +10,54 @@ import { Context, Telegraf } from "telegraf";
 // import { SceneContext, WizardContext } from "telegraf/typings/scenes";
 import { SceneContext, WizardContext } from "telegraf/scenes";
 
-
-@Wizard("addNewRoom")
+@Wizard("addnewroom")
 export class addNewRoom {
     constructor(@InjectBot() private readonly bot: Telegraf<SceneContext>) {}
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         await ctx.reply("Please enter a new room name (one word).");
-        ctx.wizard.next();
+        await ctx.wizard.next();
     }
 
     @WizardStep(2)
     @On("text")
     async onRoomName(
-        @Ctx() ctx: Context & WizardContext,
+        @Ctx() ctx: WizardContext,
         @Sender("id") id: number,
     ) {
-        const name = ctx.text;
-        console.log("name0: " + name);
-        ctx.session.__scenes.current = name;
+        const roomName = ctx.text;
+        ctx.session.__scenes.current = roomName;
         await ctx.reply(
-            "Please enter a list of users who will be iterativly cleaning the room. The list must contain only Telegram usernames, devided by a comma and a whitespase.",
+            `Please enter a list of users who will be iterativly cleaning the ${roomName}. The list must contain only Telegram usernames, devided by a whitespase.`,
         );
-        ctx.wizard.next();
+        await ctx.wizard.next();
     }
-
+    
     @WizardStep(3)
     @On("text")
     async onRoomUsers(
-        @Ctx() ctx: Context & WizardContext,
+        @Ctx() ctx: WizardContext,
+        @Sender("id") id: number,
+    ) {
+        const users = ctx.text;
+        await ctx.reply(
+            `Please enter a description for ${ctx.session.__scenes.current}.`,
+        );
+        ctx.session.__scenes.current =
+            ctx.session.__scenes.current + ":" + users;
+        await ctx.wizard.next();
+    }
+
+    @WizardStep(4)
+    @On("text")
+    async onRoomDesc(
+        @Ctx() ctx: WizardContext,
         @Sender("id") id: number,
     ) {
         await ctx.reply("Thank you.");
-        const name = ctx.session.__scenes.current;
-        console.log("name: " + name);
-        const usersString = ctx.text;
-        console.log(usersString);
-        const users = usersString.split(", ");
-        console.log(users);
-        return ctx.scene.leave();
+        console.log(ctx.session.__scenes.current);
+        console.log(ctx.text);
+        await ctx.scene.leave();
     }
 }
