@@ -25,8 +25,8 @@ export type UserType = {
 
 export type RoomType = {
     name: string;
-    description: string;
     users: string[];
+    description: string;
     currUserIndex: number;
 };
 

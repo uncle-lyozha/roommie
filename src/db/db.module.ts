@@ -6,6 +6,7 @@ import { CalendModule } from "src/calend/calend.module";
 import { UserSchema } from "./user.schema";
 import { CalendService } from "src/calend/calend.service";
 import { RoomSchema } from "./room.schema";
+import { LoadSchema } from "./load.schema";
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { RoomSchema } from "./room.schema";
             { name: "Task", schema: TaskSchema },
             { name: "User", schema: UserSchema },
             { name: "Room", schema: RoomSchema },
+            { name: "Load", schema: LoadSchema },
         ]),
         CalendModule,
     ],

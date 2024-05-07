@@ -65,8 +65,17 @@ export class BotService {
 
     @Command("scene")
     async isActive(@Ctx() context: SceneContext) {
-     
         if (context.scene && context.scene.current) {
+            // Scene is active
+            const activeSceneName = context.scene;
+            console.log(`Active scene: ${activeSceneName}`);
+        }
+        if (context.session.__scenes.current) {
+            // Scene is active
+            const activeSceneName = context.session.__scenes.current;
+            console.log(`Active scene: ${activeSceneName}`);
+        }
+        if (context.scene.current) {
             // Scene is active
             const activeSceneName = context.scene.current.id;
             console.log(`Active scene: ${activeSceneName}`);
@@ -78,10 +87,10 @@ export class BotService {
         // Other handler logic...
     }
 
-    @On('callback_query')
+    @On("callback_query")
     async onCallbackQuery(@Ctx() ctx: CallbackQuery) {
-      const data = ctx.message;
-      console.log(data)
+        const data = ctx.message;
+        console.log(data);
     }
 
     async initializeBotCommands() {

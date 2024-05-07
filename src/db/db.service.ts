@@ -62,6 +62,7 @@ export class DbService {
             console.log("No items in a Rooms collection");
         }
         rooms.forEach(async (room) => {
+            console.log(room.name);
             let userInChargeIndex = room.currUserIndex;
             let userInCharge = room.users[userInChargeIndex];
             let user = await this.findUserByName(userInCharge);
@@ -79,7 +80,7 @@ export class DbService {
                 snoozedTimes: 0,
                 storyStep: "monday",
             });
-            // console.log(newTask)
+            console.log(newTask);
             await newTask.save();
         });
     }
@@ -111,16 +112,22 @@ export class DbService {
     }
 
     async addNewRoom(room: RoomType): Promise<void> {
-        const name = room.name;
-        const users = room.users;
-        const currUserIndex = room.currUserIndex || 0;
-        const newRoom = new this.roomModel({
-            name,
-            users,
-            currUserIndex,
-        });
-        const result = newRoom.save();
-        console.log(result);
+        try {
+            const name = room.name;
+            const users = room.users;
+            const description = room.description;
+            const currUserIndex = room.currUserIndex || 0;
+            const newRoom = new this.roomModel({
+                name,
+                users,
+                description,
+                currUserIndex,
+            });
+            const result = newRoom.save();
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async setFailedTaskStatuses(): Promise<void> {
