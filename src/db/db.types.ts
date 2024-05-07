@@ -1,8 +1,8 @@
 import { ObjectId } from "mongoose";
-import { taskStatus } from "src/utils/const";
+import { taskStatus } from "utils/const";
 
 export type TaskType = {
-    _id: ObjectId;
+    _id: string;
     userName: string;
     TGId: number;
     area: string;
@@ -10,10 +10,11 @@ export type TaskType = {
     status: taskStatus;
     date: Date;
     snoozedTimes: number;
+    storyStep: string;
 };
 
 export type UserType = {
-    _id: ObjectId;
+    _id: string;
     name: string;
     TG: {
         username: string;
@@ -21,3 +22,15 @@ export type UserType = {
     };
     rating: number;
 };
+
+export type RoomType = {
+    name: string;
+    users: string[];
+    description: string;
+    currUserIndex: number;
+};
+
+export type LoadType = {
+    TGId: number;
+    taskId: string;
+}

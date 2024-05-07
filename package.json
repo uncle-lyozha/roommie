@@ -1,8 +1,8 @@
 {
-    "name": "roommie3",
-    "version": "0.0.1",
+    "name": "roommie",
+    "version": "3.0",
     "description": "",
-    "author": "",
+    "author": "Alkes Rozhnov",
     "private": true,
     "license": "UNLICENSED",
     "scripts": {

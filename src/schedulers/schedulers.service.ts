@@ -1,21 +1,25 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { CalendService } from "src/calend/calend.service";
 import { DbService } from "src/db/db.service";
+import { MailmanService } from "src/mailman/mailman.service";
+import { CleaningQuest } from "src/scenes/cleaning.scene";
 
 @Injectable()
 export class SchedulersService {
-    constructor(
-        private readonly calendar: CalendService,
-        private readonly db: DbService,
-    ) {}
+    constructor(private readonly db: DbService, private readonly mailman: MailmanService) {}
 
-    @Cron(CronExpression.EVERY_10_SECONDS, { timeZone: "Europe/Belgrade" })
-    async handleCron() {
-        console.log("10 sec.");
-        // const calendar = await this.calendar.getCalendarData()
-        // console.log(calendar)
-        const newTasks = await this.db.populateTasks();
-        console.log(newTasks);
+    @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })
+    async sundayEve() {
+        await this.db.setFailedTaskStatuses();
+        await this.db.createTasks();
+    }
+
+    @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
+    async mondayNoon() {
+        const newTasks = await this.db.getNewTasks();
+        await this.mailman.sendChatMsg(newTasks);
+        newTasks.forEach(async task => {
+            await this.mailman.sendMonPM(task);
+        })
     }
 }

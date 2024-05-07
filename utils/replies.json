@@ -1,0 +1,31 @@
+{
+    "dall-m": {
+        "caption": "Cpt Dallas:\n Good. Officer Ripley will check up on you on Thursday. \nYour objectives are:\n",
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczMp29_9o72WhrLcy2blXfBRluPZ3RBRXk2PcNB23BRqbxfZx-6uAP44ij7OCwNNbsdhDSSCbGBIbphKY_0kEQ7QvHlE_cTtYPHI9D_mmPBShNKS7nVRRcSmF8lrunWQqZDlfBkZ7vKMSZE1b6ViOGW2GA=w300-h199-s-no-gm?authuser=0"
+    },
+
+    "dall-m-g": {
+        "caption": "Cpt Dallas:\n Good. Officer Ripley will check up on you on Thursday. \nYour objectives are:\n",
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczMp29_9o72WhrLcy2blXfBRluPZ3RBRXk2PcNB23BRqbxfZx-6uAP44ij7OCwNNbsdhDSSCbGBIbphKY_0kEQ7QvHlE_cTtYPHI9D_mmPBShNKS7nVRRcSmF8lrunWQqZDlfBkZ7vKMSZE1b6ViOGW2GA=w300-h199-s-no-gm?authuser=0"
+    },
+
+    "rip-d": {
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0",
+        "caption": "Ripley:\n Great! Now we're ready to investigate that distress signal the Mother woke up us for."
+    },
+
+    "rip-sn": {
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0",
+        "caption": "Ripley:\n Ok, hang on. I'll check up on you later."
+    },
+
+    "rip-h": {
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0",
+        "caption": "Ripley:\n Understood. I'll give a call to the crew and send somebody in."
+    },
+
+    "kane-d": {
+        "src": "https://lh3.googleusercontent.com/pw/AP1GczOFzgIfHHNxYS6FwmmJVPmmdcxZDtIkPRjCQv9pVz0n7jXuSdMHKncF4vILK5MKeItg9JbDWL2QGuRMbhCqXgnUMmFwC-zvTrM2SkRT_vgwX8XHdTpXjjyd36R0s804eo1V8SeWvZukoyENU3Zlv-VdVg=w200-h279-s-no-gm?authuser=0",
+        "caption": "Kane:\n Great! Now we're ready to investigate that distress signal the Mother woke up us for."
+    }
+}
