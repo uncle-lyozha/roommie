@@ -29,11 +29,11 @@ export class addNewRoom {
         const roomName = ctx.text;
         ctx.session.__scenes.current = roomName;
         await ctx.reply(
-            `Please enter a list of users who will be iterativly cleaning the ${roomName}. The list must contain only Telegram usernames, devided by a whitespase.`,
+            `Please enter a list of users who will be cleaning the ${roomName}. The list must contain only Telegram @usernames, devided by a whitespase.`,
         );
         await ctx.wizard.next();
     }
-    
+
     @WizardStep(3)
     @On("text")
     async onRoomUsers(

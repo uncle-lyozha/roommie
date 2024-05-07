@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { RoomType, TaskType, UserType } from "./db.types";
+import { LoadType, RoomType, TaskType, UserType } from "./db.types";
 import { taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
 import { Task } from "./task.schema";
@@ -7,6 +7,7 @@ import { Model, ObjectId } from "mongoose";
 import { CalendService } from "src/calend/calend.service";
 import { User } from "./user.schema";
 import { Room } from "./room.schema";
+import { Load } from "./load.schema";
 
 @Injectable()
 export class DbService {
@@ -14,6 +15,7 @@ export class DbService {
         @InjectModel("Task") private readonly taskModel: Model<Task>,
         @InjectModel("User") private readonly userModel: Model<User>,
         @InjectModel("Room") private readonly roomModel: Model<Room>,
+        @InjectModel("Load") private readonly loadModel: Model<Load>,
         private readonly calendar: CalendService,
     ) {}
 
@@ -80,6 +82,32 @@ export class DbService {
             // console.log(newTask)
             await newTask.save();
         });
+    }
+
+    async createCbLoad(task: TaskType): Promise<string> {
+        let newLoad = new this.loadModel({
+            TGId: task.TGId,
+            taskId: task._id,
+        });
+        await newLoad.save();
+        return newLoad._id.toString();
+    }
+
+    async getCbLoad(id: string): Promise<LoadType> {
+        try {
+            const cbLoad = await this.loadModel.findById(id);
+            return cbLoad;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async deleteCbLoad(id: string) {
+        try {
+            await this.loadModel.deleteOne({ id });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async addNewRoom(room: RoomType): Promise<void> {

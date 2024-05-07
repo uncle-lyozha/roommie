@@ -28,4 +28,9 @@ export type RoomType = {
     description: string;
     users: string[];
     currUserIndex: number;
+};
+
+export type LoadType = {
+    TGId: number;
+    taskId: string;
 }

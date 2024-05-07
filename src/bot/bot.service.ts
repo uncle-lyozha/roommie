@@ -12,7 +12,9 @@ import {
 } from "nestjs-telegraf";
 import { DbService } from "src/db/db.service";
 import { Context, Scenes, Telegraf } from "telegraf";
+import { CallbackQuery } from "telegraf/typings/core/types/typegram";
 import { SceneContext, WizardContext } from "telegraf/typings/scenes";
+import { taskStatus } from "utils/const";
 
 @Injectable()
 @Update()
@@ -63,7 +65,7 @@ export class BotService {
 
     @Command("scene")
     async isActive(@Ctx() context: SceneContext) {
-        // Check if a scene is active
+     
         if (context.scene && context.scene.current) {
             // Scene is active
             const activeSceneName = context.scene.current.id;
@@ -74,6 +76,12 @@ export class BotService {
         }
 
         // Other handler logic...
+    }
+
+    @On('callback_query')
+    async onCallbackQuery(@Ctx() ctx: CallbackQuery) {
+      const data = ctx.message;
+      console.log(data)
     }
 
     async initializeBotCommands() {
