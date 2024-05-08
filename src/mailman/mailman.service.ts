@@ -21,11 +21,9 @@ export class MailmanService {
         //add check type of arg to know how to send it
         let message = "May I Have Your Attention, please! \nThis week on duty:";
         tasks.forEach(async (task) => {
-            message += `\n-= ${task.userName} is assigned to ${task.area} =-`;
+            message += `\n-= ${task.userName} is assigned to ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            await this.bot.telegram.sendMessage(task.chatId, message);
         });
-        message +=
-            "\n\nPlease recieve the assignment and guidelines in private messages.";
-        await this.bot.telegram.sendMessage(process.env.CHAT_ID, message);
     }
 
     async sendMonPM(task: TaskType) {
@@ -56,8 +54,8 @@ export class MailmanService {
             }
         }
     }
-    
-    async sendFinalPm (task: TaskType) {
+
+    async sendFinalPm(task: TaskType) {
         const taskId = task._id.toString();
         await this.bot.telegram.sendMessage(
             task.TGId,
@@ -65,10 +63,9 @@ export class MailmanService {
             Markup.inlineKeyboard([
                 Markup.button.callback(
                     "No more snoozes. Please make the job done.",
-                    taskId + ":" + taskStatus.done
+                    taskId + ":" + taskStatus.done,
                 ),
-            ])
+            ]),
         );
-
     }
 }

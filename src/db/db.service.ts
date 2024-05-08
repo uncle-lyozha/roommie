@@ -18,11 +18,13 @@ export class DbService {
     async addNewRoom(room: RoomType): Promise<void> {
         try {
             const name = room.name;
+            const chatId = room.chatId;
             const users = room.users;
             const description = room.description;
             const currUserIndex = room.currUserIndex || 0;
             const newRoom = new this.roomModel({
                 name,
+                chatId,
                 users,
                 description,
                 currUserIndex,
@@ -43,12 +45,14 @@ export class DbService {
             let userInChargeIndex = room.currUserIndex;
             let userInCharge = room.users[userInChargeIndex];
             let user = await this.findUserByName(userInCharge);
+            let chatId = room.chatId;
             let TGId = user.TG.tgId;
             let area = room.name;
             let description = room.description;
             let status = taskStatus.new;
             let newTask = new this.taskModel({
                 userName: userInCharge,
+                chatId: chatId,
                 TGId: TGId,
                 area: area,
                 description: description,

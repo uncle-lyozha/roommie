@@ -18,6 +18,7 @@ export class addNewRoom {
 
     private room: RoomType = {
         name: "",
+        chatId: 0,
         users: [],
         description: "",
         currUserIndex: 0
@@ -32,8 +33,7 @@ export class addNewRoom {
     @WizardStep(2)
     @On("text")
     async onRoomName(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
-        const chatId = ctx.chat.id;
-        console.log(chatId);
+        this.room.chatId = ctx.chat.id;
         const roomName = ctx.text;
         this.room.name = roomName;
         await ctx.reply(

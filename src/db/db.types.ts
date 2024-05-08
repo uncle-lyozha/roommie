@@ -1,9 +1,9 @@
-import { ObjectId } from "mongoose";
 import { taskStatus } from "utils/const";
 
 export type TaskType = {
     _id: string;
     userName: string;
+    chatId: number;
     TGId: number;
     area: string;
     description: string;
@@ -25,6 +25,7 @@ export type UserType = {
 
 export type RoomType = {
     name: string;
+    chatId: number;
     users: string[];
     description: string;
     currUserIndex: number;

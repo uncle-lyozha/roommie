@@ -9,6 +9,9 @@ export class Task {
     userName: string;
 
     @Prop({required: true})
+    chatId: number;
+
+    @Prop({required: true})
     TGId: number;
 
     @Prop({required: true})
