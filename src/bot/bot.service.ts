@@ -55,6 +55,13 @@ export class BotService {
         });
     }
 
+    @Command("whoisonduty")
+    async whoIsOnDuty() {
+        const tasks = await this.db.getPendingTasks();
+        console.log(tasks)
+        await this.mailman.sendChatMsg(tasks);
+    }
+
     @On("sticker")
     async on(@Ctx() ctx: Context) {
         await ctx.reply("👍");
@@ -78,6 +85,7 @@ export class BotService {
                 { command: "test", description: "test" },
                 { command: "start", description: "Start the bot" },
                 { command: "help", description: "Get help" },
+                { command: "whoisonduty", description: "Who is on duty now?" },
                 {
                     command: "add_new_room",
                     description: "Add a new room for cleaning.",

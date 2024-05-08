@@ -25,7 +25,7 @@ export class MailmanService {
         });
         message +=
             "\n\nPlease recieve the assignment and guidelines in private messages.";
-        await this.bot.telegram.sendMessage(process.env.CHAT, message);
+        await this.bot.telegram.sendMessage(process.env.CHAT_ID, message);
     }
 
     async sendMonPM(task: TaskType) {
