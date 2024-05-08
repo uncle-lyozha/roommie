@@ -1,13 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { LoadType, RoomType, TaskType, UserType } from "./db.types";
+import { RoomType, TaskType, UserType } from "./db.types";
 import { taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
 import { Task } from "./task.schema";
 import { Model, ObjectId } from "mongoose";
-import { CalendService } from "src/calend/calend.service";
 import { User } from "./user.schema";
 import { Room } from "./room.schema";
-import { Load } from "./load.schema";
 
 @Injectable()
 export class DbService {
@@ -15,46 +13,7 @@ export class DbService {
         @InjectModel("Task") private readonly taskModel: Model<Task>,
         @InjectModel("User") private readonly userModel: Model<User>,
         @InjectModel("Room") private readonly roomModel: Model<Room>,
-        @InjectModel("Load") private readonly loadModel: Model<Load>,
-        private readonly calendar: CalendService,
     ) {}
-
-    async populateTasks(): Promise<void> {
-        const calendar = await this.calendar.getCalendarData();
-        if (!calendar) {
-            console.error("Calendar data is missing.");
-            throw new Error("Can not retrieve calendar data");
-        }
-        const date = new Date().toISOString();
-        // const dateToCheck = date.split("T")[0];
-        const dateToCheck = "2024-04-08"; // test config
-        const events = calendar.items;
-        let summary: string = "";
-        for (const event of events) {
-            if (dateToCheck === event.start.date) {
-                summary += event.summary + "\n";
-                let userName = event.summary.split(" ")[1];
-                let user = await this.findUserByName(userName);
-                let TGId = user.TG.tgId;
-                let area = event.summary.split(" ")[0];
-                let description = event.description as string;
-                let status = taskStatus.new;
-                let newTask = new this.taskModel({
-                    userName: userName,
-                    TGId: TGId,
-                    area: area,
-                    description: description,
-                    status: status,
-                    date: date,
-                    snoozedTimes: 0,
-                    storyStep: "monday",
-                });
-                // console.log(newTask)
-                await newTask.save();
-            }
-        }
-        console.log("New tasks added to db.");
-    }
 
     async createTasks(): Promise<void> {
         const rooms: RoomType[] = await this.roomModel.find();
@@ -62,7 +21,6 @@ export class DbService {
             console.log("No items in a Rooms collection");
         }
         rooms.forEach(async (room) => {
-            console.log(room.name);
             let userInChargeIndex = room.currUserIndex;
             let userInCharge = room.users[userInChargeIndex];
             let user = await this.findUserByName(userInCharge);
@@ -80,35 +38,9 @@ export class DbService {
                 snoozedTimes: 0,
                 storyStep: "monday",
             });
-            console.log(newTask);
             await newTask.save();
+            console.log("New tasks added to db.");
         });
-    }
-
-    async createCbLoad(task: TaskType): Promise<string> {
-        let newLoad = new this.loadModel({
-            TGId: task.TGId,
-            taskId: task._id,
-        });
-        await newLoad.save();
-        return newLoad._id.toString();
-    }
-
-    async getCbLoad(id: string): Promise<LoadType> {
-        try {
-            const cbLoad = await this.loadModel.findById(id);
-            return cbLoad;
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    async deleteCbLoad(id: string) {
-        try {
-            await this.loadModel.deleteOne({ id });
-        } catch (err) {
-            console.error(err);
-        }
     }
 
     async addNewRoom(room: RoomType): Promise<void> {

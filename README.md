@@ -2,10 +2,14 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
-A Telegram bot for roommates to maintain a cleaning schedule, which is provided as a separate Google Calendar.
+Roomie is a Telegram bot designed to help roommates maintain a shared cleaning schedule effortlessly. Built with NestJS-Telegraf and powered by MongoDB Atlas, it offers a seamless experience for coordinating household chores.
 
-On Monday Roommie sends a notification to the group chat and private messages with description of a task for users on duty. On Thursday-Saturday it sends a private reminder which a user can snooze. On Sunday users receive the final reminder, if they won't mark the task as done, it will be failed.
+Key Features:
+Automated Task Assignments: Every Monday, Roomie sends a notification to the group chat and privately messages users with their assigned cleaning tasks for the week.
+Smart Reminders: From Thursday to Saturday, Roomie sends gentle reminders to users about their pending tasks, allowing them to snooze reminders if needed.
+Final Notices: On Sundays, users receive final reminders. Failure to mark tasks as done results in task failure.
 
-Calendar event must start on Monday and a title should contain the name of the room to be cleaned and a TG username (Kitchen @userName).
-
-User's details and tasks are stored in MongoDB Atlas.
+Additional Features:
+Easy Configuration: Roomie allows users to add rooms, define tasks, and assign users through a user-friendly Wizard interface.
+Customizable Settings: Future updates will include commands for adjusting various settings to tailor the bot's behavior to specific household needs.
+Get started with Roomie today and say goodbye to messy chores and misunderstandings!

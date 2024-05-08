@@ -2,7 +2,6 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { DbService } from "src/db/db.service";
 import { MailmanService } from "src/mailman/mailman.service";
-import { CleaningQuest } from "src/scenes/cleaning.scene";
 
 @Injectable()
 export class SchedulersService {
@@ -15,10 +14,17 @@ export class SchedulersService {
     }
 
     @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
-    async mondayNoon() {
+    async monday() {
         const newTasks = await this.db.getNewTasks();
         await this.mailman.sendChatMsg(newTasks);
         newTasks.forEach(async task => {
+            await this.mailman.sendMonPM(task);
+        })
+    }
+    @Cron("0 12 * * 4", { timeZone: "Europe/Belgrade" })
+    async repeating() {
+        const tasks = await this.db.getPendingTasks()
+        tasks.forEach(async task => {
             await this.mailman.sendMonPM(task);
         })
     }

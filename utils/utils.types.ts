@@ -2,13 +2,12 @@ import { ObjectId } from "mongoose";
 
 export type ScriptType = {
     [key: string]: {
-        msg: {
+        message: {
             type: string;
-            message?: string;
+            text?: string;
             src?: string;
         }[];
         buttons: {
-            reply: string;
             text: string;
             nextStep: string;
         }[];
