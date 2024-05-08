@@ -49,10 +49,11 @@ export class BotService {
 
     @Command("test")
     async test() {
-        const testTasks = await this.db.getPendingTasks();
-        testTasks.forEach(async (task) => {
-            await this.mailman.sendMonPM(task);
-        });
+        // const testTasks = await this.db.getPendingTasks();
+        // testTasks.forEach(async (task) => {
+        //     await this.mailman.sendMonPM(task);
+        // });
+        await this.db.setNextUserOnDuty();
     }
 
     @Command("whoisonduty")

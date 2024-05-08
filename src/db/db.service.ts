@@ -66,6 +66,22 @@ export class DbService {
         });
     }
 
+    async setNextUserOnDuty(): Promise<void> {
+        const rooms: RoomType[] = await this.roomModel.find();
+        if (rooms.length === 0) {
+            console.log("No items in a Rooms collection");
+        }
+        rooms.forEach(async (room) => {
+            const { users, currUserIndex } = room;
+            const nextIndex = (currUserIndex + 1) % users.length;
+            console.log(`Next userIndex to shift in ${room.name} is ${nextIndex}.`)
+            await this.roomModel.findOneAndUpdate(
+                { name: room.name },
+                { currUserIndex: nextIndex },
+            );
+        });
+    }
+
     async setFailedTaskStatuses(): Promise<void> {
         await this.taskModel.updateMany(
             {
