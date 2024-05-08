@@ -5,6 +5,9 @@ export class Room {
     @Prop({ required: true })
     name: string;
 
+    @Prop({ required: true })
+    chatId: number;
+
     @Prop({ type: [{ type: String }] })
     users: string[];
     
