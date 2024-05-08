@@ -5,10 +5,9 @@ import { BotModule } from "./bot/bot.module";
 import { DbModule } from "./db/db.module";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
-import { CalendModule } from './calend/calend.module';
-import { SchedulersModule } from './schedulers/schedulers.module';
-import { ScenesModule } from './scenes/scenes.module';
-import { MailmanModule } from './mailman/mailman.module';
+import { SchedulersModule } from "./schedulers/schedulers.module";
+import { ScenesModule } from "./scenes/scenes.module";
+import { MailmanModule } from "./mailman/mailman.module";
 
 @Module({
     imports: [
@@ -19,7 +18,6 @@ import { MailmanModule } from './mailman/mailman.module';
         MongooseModule.forRoot(process.env.MONGO),
         BotModule,
         DbModule,
-        CalendModule,
         SchedulersModule,
         ScenesModule,
         MailmanModule,

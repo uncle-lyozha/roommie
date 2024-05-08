@@ -11,8 +11,8 @@ import {
     Update,
 } from "nestjs-telegraf";
 import { DbService } from "src/db/db.service";
+import { MailmanService } from "src/mailman/mailman.service";
 import { Context, Scenes, Telegraf } from "telegraf";
-import { CallbackQuery } from "telegraf/typings/core/types/typegram";
 import { SceneContext, WizardContext } from "telegraf/typings/scenes";
 import { taskStatus } from "utils/const";
 
@@ -22,6 +22,7 @@ export class BotService {
     constructor(
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly db: DbService,
+        private readonly mailman: MailmanService,
     ) {
         this.initializeBotCommands();
     }
@@ -36,6 +37,24 @@ export class BotService {
         await ctx.reply("Help yourself, sucker!");
     }
 
+    @Command("add_new_room")
+    async startScene(@Ctx() ctx: SceneContext) {
+        await ctx.scene.enter("addnewroom");
+    }
+
+    @Command("create_tasks")
+    async creatTasks() {
+        await this.db.createTasks();
+    }
+
+    @Command("test")
+    async test() {
+        const testTasks = await this.db.getPendingTasks();
+        testTasks.forEach(async (task) => {
+            await this.mailman.sendMonPM(task);
+        });
+    }
+
     @On("sticker")
     async on(@Ctx() ctx: Context) {
         await ctx.reply("👍");
@@ -46,11 +65,6 @@ export class BotService {
         await ctx.reply("Hey there 👋");
     }
 
-    @Command("add_new_room")
-    async startScene(@Ctx() ctx: SceneContext) {
-        await ctx.scene.enter("addnewroom");
-    }
-
     @Hears(["dice", "Dice", "кинь кости", "кости", "кубики"])
     async dice(@Ctx() ctx: Context) {
         const diceMsg = await ctx.replyWithDice();
@@ -58,44 +72,10 @@ export class BotService {
         console.log(diceValue);
     }
 
-    @Command("create_tasks")
-    async creatTasks() {
-        await this.db.createTasks();
-    }
-
-    @Command("scene")
-    async isActive(@Ctx() context: SceneContext) {
-        if (context.scene && context.scene.current) {
-            // Scene is active
-            const activeSceneName = context.scene;
-            console.log(`Active scene: ${activeSceneName}`);
-        }
-        if (context.session.__scenes.current) {
-            // Scene is active
-            const activeSceneName = context.session.__scenes.current;
-            console.log(`Active scene: ${activeSceneName}`);
-        }
-        if (context.scene.current) {
-            // Scene is active
-            const activeSceneName = context.scene.current.id;
-            console.log(`Active scene: ${activeSceneName}`);
-        } else {
-            // No scene is active
-            console.log("No active scene");
-        }
-
-        // Other handler logic...
-    }
-
-    @On("callback_query")
-    async onCallbackQuery(@Ctx() ctx: CallbackQuery) {
-        const data = ctx.message;
-        console.log(data);
-    }
-
     async initializeBotCommands() {
         try {
             const commands = [
+                { command: "test", description: "test" },
                 { command: "start", description: "Start the bot" },
                 { command: "help", description: "Get help" },
                 {
