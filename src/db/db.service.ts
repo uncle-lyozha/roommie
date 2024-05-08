@@ -29,8 +29,8 @@ export class DbService {
                 description,
                 currUserIndex,
             });
-            const result = newRoom.save();
-            console.log(result);
+            const result = await newRoom.save();
+            console.log(`New room added:\n${result}`);
         } catch (err) {
             console.error(err);
         }
@@ -74,7 +74,9 @@ export class DbService {
         rooms.forEach(async (room) => {
             const { users, currUserIndex } = room;
             const nextIndex = (currUserIndex + 1) % users.length;
-            console.log(`Next userIndex to shift in ${room.name} is ${nextIndex}.`)
+            console.log(
+                `Next userIndex to shift in ${room.name} is ${nextIndex}.`,
+            );
             await this.roomModel.findOneAndUpdate(
                 { name: room.name },
                 { currUserIndex: nextIndex },

@@ -14,14 +14,17 @@ import { SceneContext, WizardContext } from "telegraf/scenes";
 
 @Wizard("addnewroom")
 export class addNewRoom {
-    constructor(@InjectBot() private readonly bot: Telegraf<SceneContext>, private readonly db: DbService) {}
+    constructor(
+        @InjectBot() private readonly bot: Telegraf<SceneContext>,
+        private readonly db: DbService,
+    ) {}
 
     private room: RoomType = {
         name: "",
         chatId: 0,
         users: [],
         description: "",
-        currUserIndex: 0
+        currUserIndex: 0,
     };
 
     @WizardStep(1)
