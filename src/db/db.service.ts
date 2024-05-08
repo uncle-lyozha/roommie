@@ -15,6 +15,25 @@ export class DbService {
         @InjectModel("Room") private readonly roomModel: Model<Room>,
     ) {}
 
+    async addNewRoom(room: RoomType): Promise<void> {
+        try {
+            const name = room.name;
+            const users = room.users;
+            const description = room.description;
+            const currUserIndex = room.currUserIndex || 0;
+            const newRoom = new this.roomModel({
+                name,
+                users,
+                description,
+                currUserIndex,
+            });
+            const result = newRoom.save();
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     async createTasks(): Promise<void> {
         const rooms: RoomType[] = await this.roomModel.find();
         if (rooms.length === 0) {
@@ -41,25 +60,6 @@ export class DbService {
             await newTask.save();
             console.log("New tasks added to db.");
         });
-    }
-
-    async addNewRoom(room: RoomType): Promise<void> {
-        try {
-            const name = room.name;
-            const users = room.users;
-            const description = room.description;
-            const currUserIndex = room.currUserIndex || 0;
-            const newRoom = new this.roomModel({
-                name,
-                users,
-                description,
-                currUserIndex,
-            });
-            const result = newRoom.save();
-            console.log(result);
-        } catch (err) {
-            console.error(err);
-        }
     }
 
     async setFailedTaskStatuses(): Promise<void> {

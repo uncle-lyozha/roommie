@@ -32,6 +32,8 @@ export class addNewRoom {
     @WizardStep(2)
     @On("text")
     async onRoomName(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
+        const chatId = ctx.chat.id;
+        console.log(chatId);
         const roomName = ctx.text;
         this.room.name = roomName;
         await ctx.reply(
