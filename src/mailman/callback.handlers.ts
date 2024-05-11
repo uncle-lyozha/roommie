@@ -17,11 +17,13 @@ export class CallbackHandlers {
         const data = "data" in cbQuery ? cbQuery.data : null;
         const taskId = data.split(":")[0];
         const nextStep = data.split(":")[1];
-        
+
         if (nextStep === taskStatus.pending) {
-            await this.db.setPendingTaskStatus(taskId);
+            await this.db.setTaskStatus(null, taskId);
             const task = await this.db.getTaskById(taskId);
-            console.log(`${task.userName} accepted his task in the ${task.area}.`);
+            console.log(
+                `${task.userName} accepted his task in the ${task.area}.`,
+            );
             await this.bot.telegram.deleteMessage(task.TGId, msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
@@ -30,7 +32,7 @@ export class CallbackHandlers {
         }
 
         if (nextStep === taskStatus.done) {
-            await this.db.setDoneTaskStatus(taskId);
+            await this.db.setTaskStatus(null, taskId);
             const task = await this.db.getTaskById(taskId);
             console.log(`${task.userName} has done his job in ${task.area}.`);
             await this.bot.telegram.deleteMessage(task.TGId, msgId);
@@ -46,7 +48,7 @@ export class CallbackHandlers {
         }
 
         if (nextStep === taskStatus.snoozed) {
-            await this.db.setSnoozedTaskStatus(taskId);
+            await this.db.setTaskStatus(null, taskId);
             const task = await this.db.getTaskById(taskId);
             console.log(`${task.userName} snoozed his duty in ${task.area}.`);
             await this.bot.telegram.deleteMessage(task.TGId, msgId);
