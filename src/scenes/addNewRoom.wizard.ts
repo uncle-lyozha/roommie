@@ -61,7 +61,6 @@ export class addNewRoom {
     @On("text")
     async onRoomDesc(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         this.room.description = ctx.text;
-        await ctx.reply(`New room ${this.room.name} is added.`);
         await this.db.addNewRoom(this.room);
         await ctx.scene.leave();
     }

@@ -53,12 +53,16 @@ export class BotService {
         // testTasks.forEach(async (task) => {
         //     await this.mailman.sendMonPM(task);
         // });
-        await this.db.setNextUserOnDuty();
+        // await this.db.setNextUserOnDuty();
+        const tasks = await this.db.getTasksByStatus(taskStatus.pending)
+        tasks.forEach(async (task)=>{
+          await this.db.setTaskStatus(taskStatus.failed, task._id.toString())
+        })
     }
 
     @Command("whoisonduty")
     async whoIsOnDuty() {
-        const tasks = await this.db.getPendingTasks();
+        const tasks = await this.db.getTasksByStatus(taskStatus.pending);
         console.log(tasks)
         await this.mailman.sendChatMsg(tasks);
     }

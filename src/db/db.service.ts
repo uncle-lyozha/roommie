@@ -84,38 +84,49 @@ export class DbService {
         });
     }
 
-    async setFailedTaskStatuses(): Promise<void> {
-        await this.taskModel.updateMany(
-            {
-                status: {
-                    $in: [
-                        taskStatus.new,
-                        taskStatus.snoozed,
-                        taskStatus.pending,
-                    ],
-                },
-            },
-            { status: taskStatus.failed },
-        );
-    }
+    async setTaskStatus(status?: taskStatus, taskId?: string): Promise<void> {
+        try {
+            if (status === taskStatus.new) {
+                return;
+            }
 
-    async setPendingTaskStatus(taskId: string): Promise<void> {
-        await this.taskModel.findByIdAndUpdate(taskId, {
-            status: taskStatus.pending,
-        });
-    }
+            if (status === taskStatus.failed) {
+                await this.taskModel.updateMany(
+                    {
+                        status: {
+                            $in: [
+                                taskStatus.new,
+                                taskStatus.snoozed,
+                                taskStatus.pending,
+                            ],
+                        },
+                    },
+                    { status: taskStatus.failed },
+                );
+            }
 
-    async setDoneTaskStatus(taskId: string): Promise<void> {
-        await this.taskModel.findByIdAndUpdate(taskId, {
-            status: taskStatus.done,
-        });
-    }
+            if (status === taskStatus.pending) {
+                await this.taskModel.findByIdAndUpdate(taskId, {
+                    status: taskStatus.pending,
+                });
+            }
 
-    async setSnoozedTaskStatus(taskId: string): Promise<void> {
-        await this.taskModel.findByIdAndUpdate(taskId, {
-            status: taskStatus.snoozed,
-            $inc: { snoozedTimes: 1 },
-        });
+            if (status === taskStatus.snoozed) {
+                await this.taskModel.findByIdAndUpdate(taskId, {
+                    status: taskStatus.snoozed,
+                    $inc: { snoozedTimes: 1 },
+                });
+            }
+
+            if (status === taskStatus.done) {
+                await this.taskModel.findByIdAndUpdate(taskId, {
+                    status: taskStatus.done,
+                });
+            }
+            console.log("Status updated succesfully.");
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async deleteAllTasks(): Promise<void> {
@@ -131,19 +142,25 @@ export class DbService {
         }
     }
 
-    async getNewTasks(): Promise<TaskType[]> {
-        const tasks: TaskType[] = await this.taskModel.find({
-            status: taskStatus.new,
-        });
-        return tasks;
-    }
-    async getPendingTasks(): Promise<TaskType[]> {
-        const tasks: TaskType[] = await this.taskModel.find({
-            status: {
-                $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
-            },
-        });
-        return tasks;
+    async getTasksByStatus(status: taskStatus): Promise<TaskType[]> {
+        if (status === taskStatus.pending) {
+            const tasks: TaskType[] = await this.taskModel.find({
+                status: {
+                    $in: [
+                        taskStatus.new,
+                        taskStatus.snoozed,
+                        taskStatus.pending,
+                    ],
+                },
+            });
+            return tasks;
+        }
+        // if (status === taskStatus.new) {
+        //     const tasks: TaskType[] = await this.taskModel.find({
+        //         status: taskStatus.new,
+        //     });
+        //     return tasks;
+        // }
     }
 
     async getTaskStoryStep(taskId: string) {
