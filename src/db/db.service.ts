@@ -46,7 +46,7 @@ export class DbService {
             let userInCharge = room.users[userInChargeIndex];
             let user = await this.findUserByName(userInCharge);
             let chatId = room.chatId;
-            let TGId = user.TG.tgId;
+            let TGId = user.tgId;
             let area = room.name;
             let description = room.description;
             let status = taskStatus.new;
@@ -66,10 +66,10 @@ export class DbService {
         });
     }
 
-    async setNextUserOnDuty(): Promise<void> {
+    async setNextUserOnDuty(roomName?: string): Promise<void> {
         const rooms: RoomType[] = await this.roomModel.find();
         if (rooms.length === 0) {
-            console.log("No items in a Rooms collection");
+            console.log("No rooms found in DB.");
         }
         rooms.forEach(async (room) => {
             const { users, currUserIndex } = room;
@@ -82,6 +82,19 @@ export class DbService {
                 { currUserIndex: nextIndex },
             );
         });
+    }
+
+    async addUserToRoom(chatId: number, roomName: string, userName: string): Promise<void> {
+        try {
+            const updatedroom: RoomType = await this.roomModel.findOneAndUpdate(
+                { name: roomName, chatId: chatId },
+                { $push: { users: userName } },
+                { new: true },
+            );
+            console.log(updatedroom);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async setTaskStatus(status?: taskStatus, taskId?: string): Promise<void> {
@@ -178,9 +191,9 @@ export class DbService {
         });
     }
 
-    private async findUserByName(userName: string): Promise<UserType> {
+    async findUserByName(userName: string): Promise<UserType> {
         let user: UserType | null = await this.userModel.findOne({
-            name: userName,
+            userName: userName,
         });
         if (user) {
             return user;

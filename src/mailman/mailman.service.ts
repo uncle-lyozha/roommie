@@ -17,12 +17,17 @@ export class MailmanService {
 
     private script: ScriptType = notValidatedJson;
 
-    async sendChatMsg(tasks: TaskType[]) {
-        //add check type of arg to know how to send it
-        let message = "May I Have Your Attention, please! \nThis week on duty:";
+    async notifyAllChats(tasks: TaskType[]): Promise<void> {
         tasks.forEach(async (task) => {
-            message += `\n-= ${task.userName} is assigned to ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-=Attention!=-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(task.chatId, message);
+        });
+    }
+
+    async sendChatDutyNotification(chatId: number, tasks: TaskType[]) {
+        tasks.forEach(async (task) => {
+            const message = `-=Attention!=-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            await this.bot.telegram.sendMessage(chatId, message);
         });
     }
 
