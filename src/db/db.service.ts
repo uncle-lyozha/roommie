@@ -84,7 +84,20 @@ export class DbService {
         });
     }
 
-    async addUserToRoom(chatId: number, roomName: string, userName: string): Promise<void> {
+    async createUser(name: string, tgId: number) {
+        const newUser = new this.userModel({
+            userName: name,
+            tgId: tgId,
+        });
+        const result = await newUser.save();
+        console.log(`New user created:\n ` + result);
+    }
+
+    async addUserToRoom(
+        chatId: number,
+        roomName: string,
+        userName: string,
+    ): Promise<void> {
         try {
             const updatedroom: RoomType = await this.roomModel.findOneAndUpdate(
                 { name: roomName, chatId: chatId },
@@ -191,14 +204,14 @@ export class DbService {
         });
     }
 
-    async findUserByName(userName: string): Promise<UserType> {
-        let user: UserType | null = await this.userModel.findOne({
-            userName: userName,
+    async findUserByName(name: string): Promise<UserType> {
+        const user: UserType = await this.userModel.findOne({
+            userName: name,
         });
         if (user) {
             return user;
         } else {
-            throw new Error(`User ${userName} not found in DB.`);
+            console.error(`User ${name} not found in DB.`);
         }
     }
 }

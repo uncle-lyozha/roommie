@@ -17,7 +17,7 @@ export type UserType = {
     _id: string;
     userName: string;
     tgId: number;
-    rating: number;
+    rating?: number;
 };
 
 export type RoomType = {

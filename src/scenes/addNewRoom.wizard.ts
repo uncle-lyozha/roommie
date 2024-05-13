@@ -40,7 +40,7 @@ export class addNewRoom {
         const roomName = ctx.text;
         this.room.name = roomName;
         await ctx.reply(
-            `Please enter a list of users who will be cleaning the ${roomName}. The list must contain only Telegram @usernames, devided by a whitespase.`,
+            `Please enter a list of users who will be cleaning the ${roomName}. The list must contain only Telegram usernames (without @), devided by a whitespase.`,
         );
         ctx.wizard.next();
     }
@@ -49,21 +49,23 @@ export class addNewRoom {
     @On("text")
     async onRoomUsers(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         const users = ctx.text;
-        //validate users
-        users.split(" ").forEach((user) => {
-            this.room.users.push(user);
-        });
-        this.room.users.forEach(async (name) => {
+        const invalidUsers = []
+        for (const name of users.split(" ")) {
             const user = await this.db.findUserByName(name);
             if (!user) {
-                console.log(`User ${name} not found.`);
-                await ctx.reply(
-                    `User ${name} not found. Please re-enter the name or add it to the list of chat users.`,
-                );
-                ctx.wizard.selectStep(2);
+                invalidUsers.push(name);
+            } else {
+                this.room.users.push(user.userName);
             }
-        });
-        await ctx.reply(`Please enter a description for new room.`);
+        }
+        if (invalidUsers.length > 0) {
+            const invalidUsersString = invalidUsers.join(", ");
+            await ctx.reply(`Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users.`);
+            this.room.users = []; 
+            return ctx.scene.reenter(); 
+        }
+
+        await ctx.reply(`Please enter a description for the new room.`);
         ctx.wizard.next();
     }
 
@@ -72,6 +74,7 @@ export class addNewRoom {
     async onRoomDesc(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         this.room.description = ctx.text;
         await this.db.addNewRoom(this.room);
+        await ctx.reply(`Room ${this.room.name} added.`)
         await ctx.scene.leave();
     }
 }

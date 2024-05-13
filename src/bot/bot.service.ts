@@ -6,6 +6,7 @@ import {
     Help,
     InjectBot,
     On,
+    Sender,
     Start,
     TelegrafContextType,
     Update,
@@ -29,8 +30,21 @@ export class BotService {
     }
 
     @Start()
-    async start(@Ctx() ctx: Context) {
-        await ctx.reply("Welcome");
+    async start(
+        @Ctx() ctx: Context,
+        @Sender("id") id: number,
+        @Sender("username") userName: string,
+    ) {
+        const user = await this.db.findUserByName(userName);
+        if (user) {
+            console.log("User already exists: \n" + user);
+            await ctx.reply(
+                "You are already in the users list, you don't need to use this command anymore. Try something new.",
+            );
+        } else {
+            await ctx.reply(`Welcome ${userName}`);
+            const newUser = await this.db.createUser(userName, id);
+        }
     }
 
     @Help()
@@ -60,7 +74,8 @@ export class BotService {
         // tasks.forEach(async (task) => {
         //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
         // });
-        await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
+        // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
+        // await this.db.findUserByName("Lyozha");
     }
 
     @Command("whoisonduty")
@@ -104,7 +119,11 @@ export class BotService {
         try {
             const commands = [
                 { command: "test", description: "test" },
-                { command: "start", description: "Start the bot" },
+                {
+                    command: "start",
+                    description:
+                        "Hit this command to add yourself to the users list.",
+                },
                 { command: "help", description: "Get help" },
                 { command: "whoisonduty", description: "Who is on duty now?" },
                 {
