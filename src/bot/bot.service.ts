@@ -163,6 +163,7 @@ export class BotService {
                 description: "Create tasks for all rooms.",
             },
         ];
+        this.bot.telegram.deleteMyCommands();
         this.bot.telegram.setMyCommands(commands, {
             scope: { type: "all_group_chats" },
         });
