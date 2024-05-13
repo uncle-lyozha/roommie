@@ -18,11 +18,11 @@ export class SchedulersService {
 
     @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
     async monday() {
-        await this.db.setTaskStatus();
-        await this.db.setNextUserOnDuty();
+        await this.db.setTaskStatus(taskStatus.failed);
+        await this.db.setNextUserOnDuty(); 
         await this.db.createTasks();
         const newTasks = await this.db.getTasksByStatus(taskStatus.pending);
-        await this.mailman.sendChatMsg(newTasks);
+        await this.mailman.notifyAllChats(newTasks);
         newTasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
         });

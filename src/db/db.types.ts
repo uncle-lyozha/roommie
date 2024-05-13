@@ -15,11 +15,8 @@ export type TaskType = {
 
 export type UserType = {
     _id: string;
-    name: string;
-    TG: {
-        username: string;
-        tgId: number;
-    };
+    userName: string;
+    tgId: number;
     rating: number;
 };
 
@@ -34,4 +31,4 @@ export type RoomType = {
 export type LoadType = {
     TGId: number;
     taskId: string;
-}
+};

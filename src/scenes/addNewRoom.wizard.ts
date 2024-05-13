@@ -53,6 +53,16 @@ export class addNewRoom {
         users.split(" ").forEach((user) => {
             this.room.users.push(user);
         });
+        this.room.users.forEach(async (name) => {
+            const user = await this.db.findUserByName(name);
+            if (!user) {
+                console.log(`User ${name} not found.`);
+                await ctx.reply(
+                    `User ${name} not found. Please re-enter the name or add it to the list of chat users.`,
+                );
+                ctx.wizard.selectStep(2);
+            }
+        });
         await ctx.reply(`Please enter a description for new room.`);
         ctx.wizard.next();
     }

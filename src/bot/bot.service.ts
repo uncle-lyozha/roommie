@@ -11,6 +11,7 @@ import {
     Update,
 } from "nestjs-telegraf";
 import { DbService } from "src/db/db.service";
+import { TaskType } from "src/db/db.types";
 import { MailmanService } from "src/mailman/mailman.service";
 import { Context, Scenes, Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/typings/scenes";
@@ -48,23 +49,38 @@ export class BotService {
     }
 
     @Command("test")
-    async test() {
+    async test(@Ctx() ctx: Context) {
+        const chatId = ctx.chat.id;
         // const testTasks = await this.db.getPendingTasks();
         // testTasks.forEach(async (task) => {
         //     await this.mailman.sendMonPM(task);
         // });
         // await this.db.setNextUserOnDuty();
-        const tasks = await this.db.getTasksByStatus(taskStatus.pending)
-        tasks.forEach(async (task)=>{
-          await this.db.setTaskStatus(taskStatus.failed, task._id.toString())
-        })
+        // const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+        // tasks.forEach(async (task) => {
+        //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
+        // });
+        await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
     }
 
     @Command("whoisonduty")
-    async whoIsOnDuty() {
+    async whoIsOnDuty(@Ctx() ctx: Context) {
+        const chatId = ctx.chat.id;
         const tasks = await this.db.getTasksByStatus(taskStatus.pending);
-        console.log(tasks)
-        await this.mailman.sendChatMsg(tasks);
+        if (tasks.length === 0) {
+            await this.bot.telegram.sendMessage(
+                chatId,
+                "No tasks left. Well done everybody!",
+            );
+            return;
+        }
+        let tasksToSend: TaskType[];
+        tasks.forEach((task) => {
+            if (task.chatId === chatId) {
+                tasksToSend.push(task);
+            }
+        });
+        await this.mailman.sendChatDutyNotification(chatId, tasksToSend);
     }
 
     @On("sticker")
