@@ -165,6 +165,7 @@ export class BotService {
         ];
         this.bot.telegram.setMyCommands(commands);
     }
+    
     private async isAdmin(
         chatId: number,
         userId: number,
