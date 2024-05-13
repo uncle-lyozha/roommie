@@ -48,15 +48,7 @@ export class BotService {
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        // const msg = `
-        // Available commands:
-        // /test ~ test;
-        // /start ~ Hit this command to add yourself to the users list;
-        // /whoisonduty ~ Who is on duty today?
-        // /add_new_room ~ Add a new room for cleaning;
-        // /create_tasks ~ Create tasks for all rooms.
-        // `
-        // await ctx.replyWithMarkdownV2(msg)
+        
     }
 
     @Command("add_new_room")
@@ -118,12 +110,12 @@ export class BotService {
             );
             return;
         }
-        let tasksToSend: TaskType[];
-        tasks.forEach((task) => {
+        const tasksToSend: TaskType[] = [];
+        for(const task of tasks) {
             if (task.chatId === chatId) {
                 tasksToSend.push(task);
             }
-        });
+        }
         await this.mailman.sendChatDutyNotification(chatId, tasksToSend);
     }
 

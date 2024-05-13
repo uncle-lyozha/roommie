@@ -40,7 +40,7 @@ export class addNewRoom {
         const roomName = ctx.text;
         this.room.name = roomName;
         await ctx.reply(
-            `Please enter a list of users who will be cleaning the ${roomName}. The list must contain only Telegram usernames (without @), devided by a whitespase.`,
+            `Please enter a list of users who will be cleaning the ${roomName}. The list must contain only Telegram usernames (without @), devided by a whitespace.`,
         );
         ctx.wizard.next();
     }
@@ -75,6 +75,13 @@ export class addNewRoom {
         this.room.description = ctx.text;
         await this.db.addNewRoom(this.room);
         await ctx.reply(`Room ${this.room.name} added.`)
+        this.room = {
+            name: "",
+            chatId: 0,
+            users: [],
+            description: "",
+            currUserIndex: 0,
+        };
         await ctx.scene.leave();
     }
 }
