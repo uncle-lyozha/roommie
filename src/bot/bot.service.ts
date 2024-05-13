@@ -163,11 +163,7 @@ export class BotService {
                 description: "Create tasks for all rooms.",
             },
         ];
-        this.bot.telegram.setMyCommands(commands, {
-            scope: {
-                type: "default",
-            },
-        });
+        this.bot.telegram.setMyCommands(commands);
     }
     private async isAdmin(
         chatId: number,
