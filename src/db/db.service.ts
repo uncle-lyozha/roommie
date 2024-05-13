@@ -6,6 +6,7 @@ import { Task } from "./task.schema";
 import { Model, ObjectId } from "mongoose";
 import { User } from "./user.schema";
 import { Room } from "./room.schema";
+import { Context } from "telegraf";
 
 @Injectable()
 export class DbService {
@@ -63,6 +64,35 @@ export class DbService {
             });
             await newTask.save();
             console.log("New tasks added to db.");
+        });
+    }
+    async createThisRoomTasks(chatId: number): Promise<void> {
+        const rooms: RoomType[] = await this.roomModel.find({ chatId: chatId });
+        if (rooms.length === 0) {
+            console.log("No items in a Rooms collection");
+        }
+        rooms.forEach(async (room) => {
+            let userInChargeIndex = room.currUserIndex;
+            let userInCharge = room.users[userInChargeIndex];
+            let user = await this.findUserByName(userInCharge);
+            let chatId = room.chatId;
+            let TGId = user.tgId;
+            let area = room.name;
+            let description = room.description;
+            let status = taskStatus.new;
+            let newTask = new this.taskModel({
+                userName: userInCharge,
+                chatId: chatId,
+                TGId: TGId,
+                area: area,
+                description: description,
+                status: status,
+                date: new Date().toISOString(),
+                snoozedTimes: 0,
+                storyStep: "monday",
+            });
+            await newTask.save();
+            console.log("New task added to db.");
         });
     }
 
@@ -168,7 +198,10 @@ export class DbService {
         }
     }
 
-    async getTasksByStatus(status: taskStatus): Promise<TaskType[]> {
+    async getTasksByStatus(
+        chatId: number,
+        status: taskStatus,
+    ): Promise<TaskType[]> {
         if (status === taskStatus.pending) {
             const tasks: TaskType[] = await this.taskModel.find({
                 status: {
@@ -178,6 +211,7 @@ export class DbService {
                         taskStatus.pending,
                     ],
                 },
+                chatId: chatId,
             });
             return tasks;
         }
@@ -188,6 +222,14 @@ export class DbService {
         //     return tasks;
         // }
     }
+    async getAllPendingTasks(): Promise<TaskType[]> {
+        const tasks: TaskType[] = await this.taskModel.find({
+            status: {
+                $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
+            },
+        });
+        return tasks;
+    }
 
     async getTaskStoryStep(taskId: string) {
         const task: TaskType | null = await this.taskModel.findById(taskId);
@@ -196,6 +238,21 @@ export class DbService {
         } else {
             throw new Error(`Task ${taskId} not found in DB.`);
         }
+    }
+
+    async getAllRooms(): Promise<RoomType[]> {
+        const rooms = await this.roomModel.find();
+        return rooms;
+    }
+
+    async getThisChatAllRooms(chatId: number): Promise<RoomType[]> {
+        const rooms = await this.roomModel.find({ chatId });
+        return rooms;
+    }
+
+    async getRoomByName(chatId: number, name: string): Promise<RoomType> {
+        const room = await this.roomModel.findOne({ name: name });
+        return room;
     }
 
     async setTaskStoryStep(taskId: string, step: string) {

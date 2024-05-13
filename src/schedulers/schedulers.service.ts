@@ -21,7 +21,7 @@ export class SchedulersService {
         await this.db.setTaskStatus(taskStatus.failed);
         await this.db.setNextUserOnDuty(); 
         await this.db.createTasks();
-        const newTasks = await this.db.getTasksByStatus(taskStatus.pending);
+        const newTasks = await this.db.getAllPendingTasks();
         await this.mailman.notifyAllChats(newTasks);
         newTasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
@@ -30,7 +30,7 @@ export class SchedulersService {
 
     @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
     async repeating() {
-        const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+        const tasks = await this.db.getAllPendingTasks();
         tasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
         });
@@ -38,7 +38,7 @@ export class SchedulersService {
 
     @Cron("0 12 * * 7", { timeZone: "Europe/Belgrade" })
     async sunday() {
-        const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+        const tasks = await this.db.getAllPendingTasks();
         tasks.forEach(async (task) => {
             await this.mailman.sendFinalPm(task);
         });

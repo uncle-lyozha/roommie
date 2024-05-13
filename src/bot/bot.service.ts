@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import {
     Command,
     Ctx,
@@ -13,6 +13,7 @@ import {
 import { DbService } from "src/db/db.service";
 import { TaskType } from "src/db/db.types";
 import { MailmanService } from "src/mailman/mailman.service";
+import { KeyboardService } from "src/services/keyboard.service";
 import { Context, Scenes, Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/typings/scenes";
 import { taskStatus } from "utils/const";
@@ -22,6 +23,7 @@ import { taskStatus } from "utils/const";
 export class BotService {
     constructor(
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
+        @Inject(KeyboardService) private readonly keyboard: KeyboardService,
         private readonly db: DbService,
         private readonly mailman: MailmanService,
     ) {
@@ -59,6 +61,12 @@ export class BotService {
         // await ctx.replyWithMarkdownV2(msg)
     }
 
+    @Command("rooms")
+    async showRooms(@Ctx() ctx: Context) {
+        const chatId = ctx.chat.id;
+        await this.keyboard.showRoomKeyboard(ctx, chatId);
+    }
+
     @Command("add_new_room")
     async startScene(@Ctx() ctx: SceneContext) {
         await ctx.scene.enter("addnewroom");
@@ -72,7 +80,7 @@ export class BotService {
     ) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            await this.db.createTasks();
+            await this.db.createThisRoomTasks(chatId);
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
@@ -88,13 +96,19 @@ export class BotService {
     ) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            console.log("admin route");
             // const testTasks = await this.db.getPendingTasks();
-            // testTasks.forEach(async (task) => {
-            //     await this.mailman.sendMonPM(task);
-            // });
             // await this.db.setNextUserOnDuty();
-            // const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+            const tasks = await this.db.getTasksByStatus(chatId, taskStatus.pending);
+            if (tasks.length === 0) {
+                await this.bot.telegram.sendMessage(
+                    chatId,
+                    "No tasks left. Well done everybody!",
+                );
+                return;
+            }
+            for (const task of tasks) {
+                await this.mailman.sendMonPM(task);
+            }
             // tasks.forEach(async (task) => {
             //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
             // });
@@ -110,7 +124,7 @@ export class BotService {
     @Command("whoisonduty")
     async whoIsOnDuty(@Ctx() ctx: Context) {
         const chatId = ctx.chat.id;
-        const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+        const tasks = await this.db.getTasksByStatus(chatId, taskStatus.pending);
         if (tasks.length === 0) {
             await this.bot.telegram.sendMessage(
                 chatId,
