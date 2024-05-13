@@ -8,7 +8,6 @@ import {
     On,
     Sender,
     Start,
-    TelegrafContextType,
     Update,
 } from "nestjs-telegraf";
 import { DbService } from "src/db/db.service";
@@ -49,7 +48,15 @@ export class BotService {
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        await ctx.reply("Help yourself, sucker!");
+        // const msg = `
+        // Available commands:
+        // /test ~ test;
+        // /start ~ Hit this command to add yourself to the users list;
+        // /whoisonduty ~ Who is on duty today?
+        // /add_new_room ~ Add a new room for cleaning;
+        // /create_tasks ~ Create tasks for all rooms.
+        // `
+        // await ctx.replyWithMarkdownV2(msg)
     }
 
     @Command("add_new_room")
@@ -58,24 +65,46 @@ export class BotService {
     }
 
     @Command("create_tasks")
-    async creatTasks() {
-        await this.db.createTasks();
+    async creatTasks(
+        @Ctx() ctx: Context,
+        @Sender("id") userId: number,
+        @Sender("username") userName: string,
+    ) {
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            await this.db.createTasks();
+        } else {
+            await ctx.reply(
+                `${userName} is not authorised to use this command.`,
+            );
+        }
     }
 
     @Command("test")
-    async test(@Ctx() ctx: Context) {
+    async test(
+        @Ctx() ctx: Context,
+        @Sender("id") userId: number,
+        @Sender("username") userName: string,
+    ) {
         const chatId = ctx.chat.id;
-        // const testTasks = await this.db.getPendingTasks();
-        // testTasks.forEach(async (task) => {
-        //     await this.mailman.sendMonPM(task);
-        // });
-        // await this.db.setNextUserOnDuty();
-        // const tasks = await this.db.getTasksByStatus(taskStatus.pending);
-        // tasks.forEach(async (task) => {
-        //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
-        // });
-        // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
-        // await this.db.findUserByName("Lyozha");
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            console.log("admin route");
+            // const testTasks = await this.db.getPendingTasks();
+            // testTasks.forEach(async (task) => {
+            //     await this.mailman.sendMonPM(task);
+            // });
+            // await this.db.setNextUserOnDuty();
+            // const tasks = await this.db.getTasksByStatus(taskStatus.pending);
+            // tasks.forEach(async (task) => {
+            //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
+            // });
+            // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
+            // await this.db.findUserByName("Lyozha");
+        } else {
+            await ctx.reply(
+                `${userName} is not authorised to use this command.`,
+            );
+        }
     }
 
     @Command("whoisonduty")
@@ -116,28 +145,43 @@ export class BotService {
     }
 
     async initializeBotCommands() {
-        try {
-            const commands = [
-                { command: "test", description: "test" },
-                {
-                    command: "start",
-                    description:
-                        "Hit this command to add yourself to the users list.",
-                },
-                { command: "help", description: "Get help" },
-                { command: "whoisonduty", description: "Who is on duty now?" },
-                {
-                    command: "add_new_room",
-                    description: "Add a new room for cleaning.",
-                },
-                {
-                    command: "create_tasks",
-                    description: "Create tasks for all rooms.",
-                },
-            ];
-            await this.bot.telegram.setMyCommands(commands);
-        } catch (error) {
-            console.error("Error setting bot commands:", error);
+        const commands = [
+            { command: "test", description: "test" },
+            {
+                command: "start",
+                description:
+                    "Hit this command to add yourself to the users list.",
+            },
+            { command: "help", description: "Get help" },
+            { command: "whoisonduty", description: "Who is on duty today?" },
+            {
+                command: "add_new_room",
+                description: "Add a new room for cleaning.",
+            },
+            {
+                command: "create_tasks",
+                description: "Create tasks for all rooms.",
+            },
+        ];
+        this.bot.telegram.setMyCommands(commands, {
+            scope: {
+                type: "default",
+            },
+        });
+    }
+    private async isAdmin(
+        chatId: number,
+        userId: number,
+        ctx: Context,
+    ): Promise<boolean> {
+        const chatMember = await ctx.telegram.getChatMember(chatId, userId);
+        if (
+            chatMember.status === "creator" ||
+            chatMember.status === "administrator"
+        ) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
