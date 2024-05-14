@@ -72,7 +72,7 @@ export class BotService {
         await ctx.scene.enter("addnewroom");
     }
 
-    @Command("create_tasks")
+    @Command("tasks")
     async creatTasks(
         @Ctx() ctx: Context,
         @Sender("id") userId: number,
@@ -81,6 +81,10 @@ export class BotService {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
             await this.db.createThisRoomTasks(chatId);
+            const tasks = await this.db.getTasksByStatus(chatId, taskStatus.pending);
+            for(const task of tasks) {
+                await this.mailman.sendMonPM(task);
+            }
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
@@ -173,8 +177,8 @@ export class BotService {
                 description: "Add a new room for cleaning.",
             },
             {
-                command: "create_tasks",
-                description: "Create tasks for all rooms.",
+                command: "tasks",
+                description: "Create tasks for this room and send private notifications.",
             },
         ];
         this.bot.telegram.deleteMyCommands();

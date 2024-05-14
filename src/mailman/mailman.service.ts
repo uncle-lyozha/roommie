@@ -19,14 +19,14 @@ export class MailmanService {
 
     async notifyAllChats(tasks: TaskType[]): Promise<void> {
         tasks.forEach(async (task) => {
-            const message = `-=Attention!=-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(task.chatId, message);
         });
     }
 
     async sendChatDutyNotification(chatId: number, tasks: TaskType[]) {
         tasks.forEach(async (task) => {
-            const message = `-=Attention!=-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(chatId, message);
         });
     }
@@ -67,7 +67,7 @@ export class MailmanService {
             "No more snoozes. Please make the job done.",
             Markup.inlineKeyboard([
                 Markup.button.callback(
-                    "No more snoozes. Please make the job done.",
+                    "The job is done.",
                     taskId + ":" + taskStatus.done,
                 ),
             ]),
