@@ -44,7 +44,7 @@ export class MailmanService {
                 const inlineKeyboard = buttons.map((button) => [
                     {
                         text: button.text,
-                        callback_data: taskId + ":" + button.nextStep,
+                        callback_data: "story:" + taskId + ":" + button.nextStep,
                     },
                 ]);
                 await this.bot.telegram.sendMessage(
