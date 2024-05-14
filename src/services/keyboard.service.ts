@@ -25,7 +25,51 @@ export class KeyboardService {
         );
     }
 
+    async showEditKeyboard(@Ctx() ctx: Context, roomName: string) {
+        await ctx.editMessageText(
+            "Edit options:",
+            Markup.inlineKeyboard(
+                [
+                    Markup.button.callback(
+                        "Move shift ➡️",
+                        "edit:" + roomName + ":movefwd",
+                    ),
+                    Markup.button.callback(
+                        "Move shift ⬅️",
+                        "edit:" + roomName + ":movebck",
+                    ),
+                    Markup.button.callback(
+                        "Add user",
+                        "edit:" + roomName + ":adduser",
+                    ),
+                    Markup.button.callback(
+                        "Delete user",
+                        "edit:" + roomName + ":deluser",
+                    ),
+                    Markup.button.callback(
+                        "Rename room",
+                        "edit:" + roomName + ":rename",
+                    ),
+                    Markup.button.callback(
+                        "Change description",
+                        "edit:" + roomName + ":desc",
+                    ),
+                    // Markup.button.callback(
+                    //     "Go back to rooms list",
+                    //     "backtoroomlist",
+                    // ),
+                ],
+                {
+                    columns: 1,
+                },
+            ),
+        );
+    }
+
     async hideKeyboard(@Ctx() context: Context) {
-        await context.editMessageReplyMarkup({ reply_markup: { remove_keyboard: true } } as any);
+        await context.editMessageReplyMarkup({
+            reply_markup: { remove_keyboard: true },
+        } as any);
+        await context.editMessageText("Done.")
     }
 }

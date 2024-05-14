@@ -2,10 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { RoomType, TaskType, UserType } from "./db.types";
 import { taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
-import { Task } from "./task.schema";
+import { Task } from "./schemas/task.schema";
 import { Model, ObjectId } from "mongoose";
-import { User } from "./user.schema";
-import { Room } from "./room.schema";
+import { User } from "./schemas/user.schema";
+import { Room } from "./schemas/room.schema";
 import { Context } from "telegraf";
 
 @Injectable()
