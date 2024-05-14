@@ -81,6 +81,21 @@ export class BotService {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
             await this.db.createThisRoomTasks(chatId);
+        } else {
+            await ctx.reply(
+                `${userName} is not authorised to use this command.`,
+            );
+        }
+    }
+    
+    @Command("notify")
+    async notify(
+        @Ctx() ctx: Context,
+        @Sender("id") userId: number,
+        @Sender("username") userName: string,
+    ) {
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
             const tasks = await this.db.getTasksByStatus(chatId, taskStatus.pending);
             for(const task of tasks) {
                 await this.mailman.sendMonPM(task);
@@ -90,6 +105,7 @@ export class BotService {
                 `${userName} is not authorised to use this command.`,
             );
         }
+
     }
 
     @Command("test")
@@ -178,7 +194,11 @@ export class BotService {
             },
             {
                 command: "tasks",
-                description: "Create tasks for this room and send private notifications.",
+                description: "Create tasks for this chat.",
+            },
+            {
+                command: "notify",
+                description: "Send private notifications.",
             },
         ];
         this.bot.telegram.deleteMyCommands();
