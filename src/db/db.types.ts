@@ -20,7 +20,7 @@ export type UserType = {
     rating?: number;
 };
 
-export type RoomType = {
+export type JobType = {
     name: string;
     chatId: number;
     users: string[];

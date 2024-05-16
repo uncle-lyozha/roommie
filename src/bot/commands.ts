@@ -8,13 +8,15 @@ import {
     Update,
     Command,
 } from "nestjs-telegraf";
-import { DbService } from "src/db/db.service";
+import { TaskService } from "src/db/task.service";
 import { TaskType } from "src/db/db.types";
 import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Context, Telegraf } from "telegraf";
 import { SceneContext } from "telegraf/scenes";
 import { taskStatus } from "utils/const";
+import { UserService } from "src/db/user.service";
+import { JobService } from "src/db/job.service";
 
 @Injectable()
 @Update()
@@ -22,7 +24,9 @@ export class Commands {
     constructor(
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
         @Inject(KeyboardService) private readonly keyboard: KeyboardService,
-        private readonly db: DbService,
+        private readonly taskService: TaskService,
+        private readonly userService: UserService,
+        private readonly jobService: JobService,
         private readonly mailman: MailmanService,
     ) {
         this.initializeBotCommands();
@@ -31,11 +35,15 @@ export class Commands {
     async initializeBotCommands() {
         const commands = [
             { command: "help", description: "How this all work?" },
-            { command: "menu", description: "Show a menu, where you can see info, edit and add a task." },
+            {
+                command: "menu",
+                description:
+                    "Show a menu, where you can see info, edit and add a job.",
+            },
             { command: "whoisonduty", description: "Who is on duty today?" },
             {
-                command: "add_new_task",
-                description: "Add a new task for scheduling.",
+                command: "add_new_job",
+                description: "Add a new job for scheduling.",
             },
             {
                 command: "tasks",
@@ -63,7 +71,7 @@ export class Commands {
         @Sender("id") id: number,
         @Sender("username") userName: string,
     ) {
-        const user = await this.db.findUserByName(userName);
+        const user = await this.userService.findUserByName(userName);
         if (user) {
             console.log("User already exists: \n" + user);
             await ctx.reply(
@@ -71,38 +79,34 @@ export class Commands {
             );
         } else {
             await ctx.reply(`Welcome ${userName}`);
-            const newUser = await this.db.createUser(userName, id);
+            const newUser = await this.userService.createUser(userName, id);
         }
     }
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        // const msg = `
-        // Available commands:
-        // /test ~ test;
-        // /start ~ Hit this command to add yourself to the users list;
-        // /whoisonduty ~ Who is on duty today?
-        // /add_new_room ~ Add a new room for cleaning;
-        // /create_tasks ~ Create tasks for all rooms.
-        // `
-        // await ctx.replyWithMarkdownV2(msg)
+        const msg = `
+        First, all users must click "Start" button in private message with Roommie so the bot
+        could send private messages and a user's ID will be saved.
+        `;
+        await ctx.reply(msg);
     }
 
     @Command("menu")
     async showRooms(@Ctx() ctx: Context) {
         const chatId = ctx.chat.id;
-        await this.keyboard.showRoomKeyboard(ctx, chatId);
+        await this.keyboard.showJobKeyboard(ctx, chatId);
     }
 
-    @Command("add_new_task")
+    @Command("addnewjob")
     async startScene(@Ctx() ctx: SceneContext) {
-        await ctx.scene.enter("addnewtask");
+        await ctx.scene.enter("addnewjob");
     }
 
     @Command("whoisonduty")
     async whoIsOnDuty(@Ctx() ctx: Context) {
         const chatId = ctx.chat.id;
-        const tasks = await this.db.getTasksByStatus(
+        const tasks = await this.taskService.getTasksByStatus(
             chatId,
             taskStatus.pending,
         );
@@ -113,26 +117,26 @@ export class Commands {
             );
             return;
         }
-        let tasksToSend: TaskType[];
-        tasks.forEach((task) => {
-            if (task.chatId === chatId) {
-                tasksToSend.push(task);
-            }
-        });
-        await this.mailman.sendChatDutyNotification(chatId, tasksToSend);
+        // let tasksToSend: TaskType[];
+        // tasks.forEach((task) => {
+        //     if (task.chatId === chatId) {
+        //         tasksToSend.push(task);
+        //     }
+        // });
+        await this.mailman.sendChatDutyNotification(chatId, tasks);
     }
-    
-// Commands available only to chat creator/admin
+
+    // Commands available only to chat creator/admin
 
     @Command("tasks")
-    async creatTasks(
+    async createTasks(
         @Ctx() ctx: Context,
         @Sender("id") userId: number,
         @Sender("username") userName: string,
     ) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            await this.db.createThisRoomTasks(chatId);
+            await this.taskService.createTasks(chatId);
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
@@ -148,7 +152,7 @@ export class Commands {
     ) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            const tasks = await this.db.getTasksByStatus(
+            const tasks = await this.taskService.getTasksByStatus(
                 chatId,
                 taskStatus.pending,
             );

@@ -3,11 +3,13 @@ import { UpdateListeners } from "./listeners";
 import { TelegrafModule } from "nestjs-telegraf";
 import { Telegraf, session } from "telegraf";
 import { DbModule } from "src/db/db.module";
-import { DbService } from "src/db/db.service";
-import { addNewRoom } from "src/scenes/addNewRoom.wizard";
 import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Commands } from "./commands";
+import { JobService } from "src/db/job.service";
+import { TaskService } from "src/db/task.service";
+import { UserService } from "src/db/user.service";
+import { addNewJob } from "src/scenes/addNewJob.wizard";
 
 @Module({
     imports: [
@@ -22,8 +24,10 @@ import { Commands } from "./commands";
     providers: [
         UpdateListeners,
         Commands,
-        addNewRoom,
-        DbService,
+        addNewJob,
+        JobService,
+        TaskService,
+        UserService,
         MailmanService,
         KeyboardService,
     ],

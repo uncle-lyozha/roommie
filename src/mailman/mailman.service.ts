@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { InjectBot } from "nestjs-telegraf";
-import { DbService } from "src/db/db.service";
 import { TaskType } from "src/db/db.types";
 import { Markup, Telegraf } from "telegraf";
 import { SceneContext } from "telegraf/scenes";
@@ -10,23 +9,20 @@ import { ScriptType } from "utils/utils.types";
 
 @Injectable()
 export class MailmanService {
-    constructor(
-        @InjectBot() private readonly bot: Telegraf<SceneContext>,
-        private readonly db: DbService,
-    ) {}
+    constructor(@InjectBot() private readonly bot: Telegraf<SceneContext>) {}
 
     private script: ScriptType = notValidatedJson;
 
     async notifyAllChats(tasks: TaskType[]): Promise<void> {
         tasks.forEach(async (task) => {
-            const message = `-= Attention! =-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(task.chatId, message);
         });
     }
 
     async sendChatDutyNotification(chatId: number, tasks: TaskType[]) {
         tasks.forEach(async (task) => {
-            const message = `-= Attention! =-\n-= This week ${task.userName} is on duty in the ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(chatId, message);
         });
     }
@@ -44,7 +40,8 @@ export class MailmanService {
                 const inlineKeyboard = buttons.map((button) => [
                     {
                         text: button.text,
-                        callback_data: "story:" + taskId + ":" + button.nextStep,
+                        callback_data:
+                            "story:" + taskId + ":" + button.nextStep,
                     },
                 ]);
                 await this.bot.telegram.sendMessage(
