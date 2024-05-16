@@ -1,13 +1,17 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { DbService } from "src/db/db.service";
+import { JobService } from "src/db/job.service";
+import { TaskService } from "src/db/task.service";
+import { UserService } from "src/db/user.service";
 import { MailmanService } from "src/mailman/mailman.service";
 import { taskStatus } from "utils/const";
 
 @Injectable()
 export class SchedulersService {
     constructor(
-        private readonly db: DbService,
+        private readonly userServise: UserService,
+        private readonly jobService: JobService,
+        private readonly taskService: TaskService,
         private readonly mailman: MailmanService,
     ) {}
 
@@ -18,10 +22,10 @@ export class SchedulersService {
 
     @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
     async monday() {
-        await this.db.setTaskStatus(taskStatus.failed);
-        await this.db.setNextUserOnDuty(); 
-        await this.db.createTasks();
-        const newTasks = await this.db.getAllPendingTasks();
+        await this.taskService.setTaskStatus(taskStatus.failed);
+        await this.jobService.setNextUserOnDutyForAll();
+        await this.taskService.createTasks();
+        const newTasks = await this.taskService.getAllPendingTasks();
         await this.mailman.notifyAllChats(newTasks);
         newTasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
@@ -30,7 +34,7 @@ export class SchedulersService {
 
     @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
     async repeating() {
-        const tasks = await this.db.getAllPendingTasks();
+        const tasks = await this.taskService.getAllPendingTasks();
         tasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
         });
@@ -38,7 +42,7 @@ export class SchedulersService {
 
     @Cron("0 12 * * 7", { timeZone: "Europe/Belgrade" })
     async sunday() {
-        const tasks = await this.db.getAllPendingTasks();
+        const tasks = await this.taskService.getAllPendingTasks();
         tasks.forEach(async (task) => {
             await this.mailman.sendFinalPm(task);
         });

@@ -1,19 +1,21 @@
 import { Module } from "@nestjs/common";
-import { DbService } from "./db.service";
+import { TaskService } from "./task.service";
 import { MongooseModule } from "@nestjs/mongoose";
-import { Task, TaskSchema } from "./schemas/task.schema";
+import { TaskSchema } from "./schemas/task.schema";
 import { UserSchema } from "./schemas/user.schema";
-import { RoomSchema } from "./schemas/room.schema";
+import { JobSchema } from "./schemas/job.schema";
+import { JobService } from "./job.service";
+import { UserService } from "./user.service";
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: "Task", schema: TaskSchema },
             { name: "User", schema: UserSchema },
-            { name: "Room", schema: RoomSchema },
+            { name: "Job", schema: JobSchema },
         ]),
     ],
-    providers: [DbService],
+    providers: [TaskService, JobService, UserService],
     exports: [MongooseModule],
 })
 export class DbModule {}

@@ -1,15 +1,16 @@
 {
     "new": {
         "message": [
-            { "type": "text", "text": "Congratulations! This week you are on duty in " },
+            {
+                "type": "text",
+                "text": "Congratulations! This week you are on duty to "
+            },
             {
                 "type": "image",
                 "src": "https://lh3.googleusercontent.com/pw/AP1GczN6OG-7MP_drsLjDbA_Mvy8YGEawfmQF6PFxEZOCse8O9ZbeYnIqZJNLcbVrnG31Ka2mr7iS8aGF0hCRW0l4kOFJCrSoG6hCnpkP9fQOLPOAS0fhYMGNpXtTRPG3pH2Mk2q9ZTT9x-nCtf9od1kPp4MyA=w202-h300-s-no-gm?authuser=0"
             }
         ],
-        "buttons": [
-            { "text": "Accept the assignment.", "nextStep": "pending" }
-        ]
+        "buttons": [{ "text": "Accept the job.", "nextStep": "pending" }]
     },
     "pending": {
         "message": [

@@ -1,8 +1,10 @@
 import { Inject } from "@nestjs/common";
 import { Ctx, InjectBot, On, Update } from "nestjs-telegraf";
-import { DbService } from "src/db/db.service";
+import { JobService } from "src/db/job.service";
+import { TaskService } from "src/db/task.service";
+import { UserService } from "src/db/user.service";
 import { KeyboardService } from "src/services/keyboard.service";
-import { Context, Markup, Telegraf } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { taskStatus } from "utils/const";
 
 @Update()
@@ -10,7 +12,9 @@ export class CallbackHandlers {
     constructor(
         @InjectBot() private readonly bot: Telegraf<Context>,
         @Inject(KeyboardService) private readonly keyboard: KeyboardService,
-        private readonly db: DbService,
+        private readonly jobService: JobService,
+        private readonly taskService: TaskService,
+        private readonly userService: UserService,
     ) {}
 
     @On("callback_query")
@@ -21,8 +25,8 @@ export class CallbackHandlers {
         const id = data.split(":")[1];
         const nextStep = data.split(":")[2];
 
-        if (cbType === "rooms") {
-            await this.handleRoomMenu(ctx, id);
+        if (cbType === "jobs") {
+            await this.handleJobMenu(ctx, id);
         }
         if (cbType === "story") {
             await this.handleStorySteps(ctx, id, nextStep);
@@ -33,27 +37,27 @@ export class CallbackHandlers {
         if (cbType === "edit") {
             await this.keyboard.hideKeyboard(ctx);
         }
-        if (cbType === "backtoroomlist") {
-            await this.keyboard.showRoomKeyboard(ctx, ctx.chat.id);
+        if (cbType === "backtojoblist") {
+            await this.keyboard.showJobKeyboard(ctx, ctx.chat.id);
         }
     }
 
-    private async handleRoomMenu(ctx: Context, id: string) {
-        const room = await this.db.getRoomByName(ctx.chat.id, id);
+    private async handleJobMenu(ctx: Context, id: string) {
+        const job = await this.jobService.getJobByName(ctx.chat.id, id);
         // await this.keyboard.hideKeyboard(ctx);
         const msg = `
-        ~~${room.name}:~~
-        Users: ${room.users};
-        On Duty: ${room.users[room.currUserIndex]};
-        Descritption: ${room.description}
+        ~~${job.name}:~~
+        Users: ${job.users};
+        On Duty: ${job.users[job.currUserIndex]};
+        Descritption: ${job.description}
         `;
         await ctx.editMessageText(msg, {
             reply_markup: {
                 inline_keyboard: [
                     [
                         {
-                            text: "Edit Room",
-                            callback_data: "editButton:" + room.name,
+                            text: "Edit job",
+                            callback_data: "editButton:" + job.name,
                         },
                     ],
                 ],
@@ -67,11 +71,9 @@ export class CallbackHandlers {
         nextStep: string,
     ) {
         if (nextStep === taskStatus.pending) {
-            await this.db.setTaskStatus(null, taskId);
-            const task = await this.db.getTaskById(taskId);
-            console.log(
-                `${task.userName} accepted his task in the ${task.area}.`,
-            );
+            await this.taskService.setTaskStatus(null, taskId);
+            const task = await this.taskService.getTaskById(taskId);
+            console.log(`${task.userName} accepted his task: ${task.area}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
@@ -80,9 +82,9 @@ export class CallbackHandlers {
         }
 
         if (nextStep === taskStatus.done) {
-            await this.db.setTaskStatus(null, taskId);
-            const task = await this.db.getTaskById(taskId);
-            console.log(`${task.userName} has done his job in ${task.area}.`);
+            await this.taskService.setTaskStatus(null, taskId);
+            const task = await this.taskService.getTaskById(taskId);
+            console.log(`${task.userName} has done his job: ${task.area}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
@@ -90,15 +92,15 @@ export class CallbackHandlers {
             );
             await ctx.telegram.sendPoll(
                 process.env.CHAT_ID as string,
-                `How do you assess ${task.userName}'s shift in the ${task.area}`,
+                `How do you assess ${task.userName}'s job: ${task.area}?`,
                 ["🦍", "🍄", "💩"],
             );
         }
 
         if (nextStep === taskStatus.snoozed) {
-            await this.db.setTaskStatus(null, taskId);
-            const task = await this.db.getTaskById(taskId);
-            console.log(`${task.userName} snoozed his duty in ${task.area}.`);
+            await this.taskService.setTaskStatus(null, taskId);
+            const task = await this.taskService.getTaskById(taskId);
+            console.log(`${task.userName} snoozed his task: ${task.area}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,

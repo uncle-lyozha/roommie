@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 @Schema()
-export class Room {
+export class Job {
     @Prop({ required: true })
     name: string;
 
@@ -17,4 +17,4 @@ export class Room {
     @Prop({ type: Number, default: 0 })
     currUserIndex: number;
 }
-export const RoomSchema = SchemaFactory.createForClass(Room);
+export const JobSchema = SchemaFactory.createForClass(Job);

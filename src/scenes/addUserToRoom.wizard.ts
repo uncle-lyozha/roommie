@@ -1,13 +1,12 @@
 import { Ctx, InjectBot, Sender, Wizard, WizardStep } from "nestjs-telegraf";
-import { DbService } from "src/db/db.service";
 import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
 
-@Wizard('addusertoroom')
+@Wizard("addusertoroom")
 export class addUserToRoom {
     constructor(
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
-        private readonly db: DbService,
+        
     ) {}
 
     @WizardStep(1)
