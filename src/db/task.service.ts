@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { JobType, TaskType, UserType } from "./db.types";
-import { taskStatus } from "utils/const";
+import { moveEnum, taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
 import { Task } from "./schemas/task.schema";
 import { Model } from "mongoose";
@@ -52,7 +52,7 @@ export class TaskService {
         }
     }
 
-    async setTaskStatus(status?: taskStatus, taskId?: string): Promise<void> {
+    async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
         try {
             if (status === taskStatus.new) {
                 return;
@@ -94,6 +94,10 @@ export class TaskService {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    async setNextDuty(taskId: string, dir: moveEnum) {
+
     }
 
     async getTaskById(id: string): Promise<TaskType> {

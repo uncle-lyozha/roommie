@@ -3,6 +3,7 @@ import { Ctx, InjectBot } from "nestjs-telegraf";
 import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { Context, Markup, Telegraf } from "telegraf";
+import { editMenuOption } from "utils/const";
 
 @Injectable()
 export class KeyboardService {
@@ -13,6 +14,7 @@ export class KeyboardService {
 
     async showJobKeyboard(@Ctx() ctx: Context, chatId: number): Promise<void> {
         const jobs: JobType[] = await this.jobService.getAllJobs(chatId);
+        console.log(jobs)
         if (!jobs) {
             await ctx.reply("No jobs found to DB.");
             return;
@@ -33,27 +35,27 @@ export class KeyboardService {
                 [
                     Markup.button.callback(
                         "Move shift ➡️",
-                        "edit:" + jobName + ":movefwd",
+                        "edit:" + jobName + editMenuOption.moveUserFwd,
                     ),
                     Markup.button.callback(
                         "Move shift ⬅️",
-                        "edit:" + jobName + ":movebck",
+                        "edit:" + jobName + editMenuOption.moveUserBck,
                     ),
                     Markup.button.callback(
                         "Add user",
-                        "edit:" + jobName + ":adduser",
+                        "edit:" + jobName + editMenuOption.addUser,
                     ),
                     Markup.button.callback(
                         "Delete user",
-                        "edit:" + jobName + ":deluser",
+                        "edit:" + jobName + editMenuOption.delUser,
                     ),
                     Markup.button.callback(
                         "Rename job",
-                        "edit:" + jobName + ":rename",
+                        "edit:" + jobName + editMenuOption.renameJob,
                     ),
                     Markup.button.callback(
                         "Change description",
-                        "edit:" + jobName + ":desc",
+                        "edit:" + jobName + editMenuOption.editDescr,
                     ),
                     // Markup.button.callback(
                     //     "Go back to jobs list",
