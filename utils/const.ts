@@ -11,11 +11,23 @@ export enum moveEnum {
     backwards = "backwards"
 }
 
-export enum editMenuOption {
+export enum actionMenuOption {
+    edit = "edit",
     moveUserFwd = "moveFwd",
     moveUserBck = "moveBck",
     addUser = "addUser",
     delUser = "delUser",
     renameJob = "renameJob",
-    editDescr = "editDescr"
+    editDescr = "editDescr",
+    addJob = "addJob",
+    deleteJob = "deleteJob",
+    exit = "exit",
+    null = "empty"
+}
+
+export enum cbType {
+    job = "job",
+    edit = "edit",
+    editMenu = "editMenu",
+    story = "story"
 }

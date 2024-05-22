@@ -1,9 +1,8 @@
-import { Inject } from "@nestjs/common";
 import { Ctx, InjectBot, On, Update } from "nestjs-telegraf";
+import { MySessionType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
+import { SessionService } from "src/db/session.service";
 import { TaskService } from "src/db/task.service";
-import { UserService } from "src/db/user.service";
-import { KeyboardService } from "src/services/keyboard.service";
 import { Context, Telegraf } from "telegraf";
 import { taskStatus } from "utils/const";
 
@@ -11,22 +10,19 @@ import { taskStatus } from "utils/const";
 export class StoryCbQueryHandler {
     constructor(
         @InjectBot() private readonly bot: Telegraf<Context>,
-        @Inject(KeyboardService) private readonly keyboard: KeyboardService,
         private readonly jobService: JobService,
         private readonly taskService: TaskService,
-        private readonly userService: UserService,
+        private readonly sessionService: SessionService,
     ) {}
 
     @On("callback_query")
     async onStoryCbQuery(@Ctx() ctx: Context) {
         const cbQuery = ctx.callbackQuery;
-        const data = "data" in cbQuery ? cbQuery.data : null;
-        const cbType = data.split(":")[0];
-        const taskId = data.split(":")[1];
-        const nextStep = data.split(":")[2];
-
-        if (cbType === "story") {
-            await this.handleStorySteps(ctx, taskId, nextStep);
+        const payloadId = "data" in cbQuery ? cbQuery.data : null;
+        const payload: MySessionType =
+            await this.sessionService.findSessionById(payloadId);
+        if (payload.type === "story") {
+            await this.handleStorySteps(ctx, payload.id, payload.option);
         } else {
             return null;
         }
@@ -55,13 +51,13 @@ export class StoryCbQueryHandler {
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
-                "Awesome! You're the best.",
+                "Awesome! You're the best. Around!",
             );
-            await ctx.telegram.sendPoll(
-                process.env.CHAT_ID as string,
-                `How do you assess ${task.userName}'s job: ${task.area}?`,
-                ["🦍", "🍄", "💩"],
-            );
+            // await ctx.telegram.sendPoll(
+            //     ctx.chat.id,
+            //     `How do you assess ${task.userName}'s job: ${task.area}?`,
+            //     ["🦍", "🍄", "💩"],
+            // ); // send to general chat
         }
 
         if (nextStep === taskStatus.snoozed) {

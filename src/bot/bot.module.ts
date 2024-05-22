@@ -10,6 +10,8 @@ import { JobService } from "src/db/job.service";
 import { TaskService } from "src/db/task.service";
 import { UserService } from "src/db/user.service";
 import { addNewJob } from "src/scenes/addNewJob.wizard";
+import { SessionService } from "src/db/session.service";
+import { MenuWizard } from "src/scenes/menu.wizard";
 
 @Module({
     imports: [
@@ -28,8 +30,10 @@ import { addNewJob } from "src/scenes/addNewJob.wizard";
         JobService,
         TaskService,
         UserService,
+        SessionService,
         MailmanService,
         KeyboardService,
+        MenuWizard
     ],
 })
 export class BotModule {}

@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Job } from "./schemas/job.schema";
 import { JobType } from "./db.types";
-import { editMenuOption, moveEnum } from "utils/const";
+import { actionMenuOption } from "utils/const";
 
 @Injectable()
 export class JobService {
@@ -48,17 +48,19 @@ export class JobService {
     }
 
     async deleteUserFromJob(
-        chatId: number,
-        jobName: string,
+        jobId: string,
+        // chatId: number,
+        // jobName: string,
         userName: string,
     ): Promise<void> {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
+            console.log('HIIIi!')
+            await this.jobModel.findByIdAndUpdate(
+                jobId,
                 { $pull: { users: userName } },
                 { new: true },
             );
-            console.log(`User ${userName} removed from job ${jobName}.`);
+            console.log(`User ${userName} removed from job ${jobId}.`);
         } catch (err) {
             console.error(err);
         }
@@ -109,22 +111,33 @@ export class JobService {
     }
 
     async getJobByName(chatId: number, name: string): Promise<JobType> {
-        const job = await this.jobModel.findOne({ name: name, chatId: chatId });
+        const job: JobType = await this.jobModel.findOne({
+            name: name,
+            chatId: chatId,
+        });
         return job;
     }
 
-    async setNextUserOnDuty(jobName: string, dir: editMenuOption): Promise<void> {
-        const job = await this.jobModel.findOne({ name: jobName });
+    async getJobById(jobId: string): Promise<JobType> {
+        const job: JobType = await this.jobModel.findById(jobId);
+        return job;
+    }
+
+    async setNextUserOnDuty(
+        jobId: string,
+        dir: actionMenuOption,
+    ): Promise<void> {
+        const job = await this.jobModel.findById(jobId);
         const { users, currUserIndex } = job;
         let nextIndex: number;
-        if (dir === editMenuOption.moveUserFwd) {
+        if (dir === actionMenuOption.moveUserFwd) {
             nextIndex = (currUserIndex + 1) % users.length;
         }
-        if (dir === editMenuOption.moveUserBck) {
+        if (dir === actionMenuOption.moveUserBck) {
             nextIndex = (currUserIndex - 1 + users.length) % users.length;
         }
         job.currUserIndex = nextIndex;
-        await job.save()
+        await job.save();
         console.log(
             `Next user to shift in ${job.name} is ${job.users[nextIndex]}.`,
         );

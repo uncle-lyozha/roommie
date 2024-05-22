@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { actionMenuOption } from "./const";
 
 export type ScriptType = {
     [key: string]: {
@@ -22,7 +22,12 @@ export type RepliesType = {
 };
 
 export type CbDataType = {
-    next: string;
-    id: string;
-    reply: string
+    type: string;
+    jobId?: string;
+    taskId?: string;
+    option?: actionMenuOption;
+};
+
+export type customStateType = {
+    jobId: string;
 };

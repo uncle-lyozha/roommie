@@ -4,7 +4,8 @@ import { JobService } from "src/db/job.service";
 import { TaskService } from "src/db/task.service";
 import { UserService } from "src/db/user.service";
 import { MailmanService } from "src/mailman/mailman.service";
-import { editMenuOption, moveEnum, taskStatus } from "utils/const";
+import { Telegraf } from "telegraf";
+import { actionMenuOption, moveEnum, taskStatus } from "utils/const";
 
 @Injectable()
 export class SchedulersService {
@@ -17,6 +18,7 @@ export class SchedulersService {
 
     @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })
     async sundayEve() {
+        
         const pendingTasks = await this.taskService.getAllPendingTasks();
         if (pendingTasks) {
             for (const task of pendingTasks) {
@@ -31,7 +33,7 @@ export class SchedulersService {
             for (const job of jobs) {
                 await this.jobService.setNextUserOnDuty(
                     job.name,
-                    editMenuOption.moveUserFwd,
+                    actionMenuOption.moveUserFwd,
                 );
                 console.log(`Shift moved ffw for ${job.name}`);
             }

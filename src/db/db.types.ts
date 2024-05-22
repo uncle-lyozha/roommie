@@ -1,4 +1,4 @@
-import { taskStatus } from "utils/const";
+import {  taskStatus } from "utils/const";
 
 export type TaskType = {
     _id: string;
@@ -21,6 +21,7 @@ export type UserType = {
 };
 
 export type JobType = {
+    _id: string;
     name: string;
     chatId: number;
     users: string[];
@@ -28,7 +29,8 @@ export type JobType = {
     currUserIndex: number;
 };
 
-export type LoadType = {
-    TGId: number;
-    taskId: string;
-};
+export type MySessionType = {
+    type: string;
+    id: string;
+    option: string;
+}
