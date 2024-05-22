@@ -9,7 +9,7 @@ import {
 import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
-import { Context, Telegraf } from "telegraf";
+import { Telegraf } from "telegraf";
 // import { SceneContext, WizardContext } from "telegraf/typings/scenes";
 import { SceneContext, WizardContext } from "telegraf/scenes";
 
@@ -22,6 +22,7 @@ export class addNewJob {
     ) {}
 
     private job: JobType = {
+        _id: "",
         name: "",
         chatId: 0,
         users: [],
@@ -31,21 +32,20 @@ export class addNewJob {
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
-        const msg =
-            "Please enter a job name (Guidline: use a verb-noun construction, e.x. 'Clean the Kitchen', 'Pay the bills'). You can edit it later.";
-        await ctx.sendMessage(msg);
+        this.job.chatId = ctx.chat.id;
+        const pmMsg =
+            "Please enter a unique job name (Guidline: use a verb-noun construction, e.x. 'Clean the Kitchen', 'Pay the bills'). You can edit it later.";
+        await ctx.reply(pmMsg);
         ctx.wizard.next();
     }
 
     @WizardStep(2)
     @On("text")
     async onJobName(@Ctx() ctx: WizardContext) {
-        this.job.chatId = ctx.chat.id;
         const jobName = ctx.text;
         this.job.name = jobName;
-        await ctx.reply(
-            `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (without @), devided by a whitespase.`,
-        );
+        const pmMsg = `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (without @), devided by a whitespase.`;
+        await ctx.reply(pmMsg);
         ctx.wizard.next();
     }
 
@@ -64,32 +64,35 @@ export class addNewJob {
         }
         if (invalidUsers.length > 0) {
             const invalidUsersString = invalidUsers.join(", ");
-            await ctx.reply(
-                `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command).`,
-            );
-            this.job.users = [];
+            const pmMsg = 
+                `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command).`
+            await ctx.reply(pmMsg);
+            this.job = {
+                _id: "",
+                name: "",
+                chatId: 0,
+                users: [],
+                description: "",
+                currUserIndex: 0,
+            };
+            this.job = null;
             return ctx.scene.reenter();
         }
 
-        await ctx.reply(
-            `Please enter a description for the new job (what a user on duty should do).`,
-        );
+        const pmMsg = 
+            `Please enter a description for the new job (what a user on duty should do).`
+        await ctx.reply(pmMsg);
         ctx.wizard.next();
     }
 
     @WizardStep(4)
     @On("text")
-    async onJobDesc(@Ctx() ctx: WizardContext) {
+    async onJobDesc(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         this.job.description = ctx.text;
         await this.jobService.addNewJob(this.job);
-        this.job = {
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
-        await ctx.reply(`New Job ${this.job.name} added.`);
+        const pmMsg = `New Job "${this.job.name}" added.`
+        await ctx.reply(pmMsg);
+        this.job = null;
         await ctx.scene.leave();
     }
 }

@@ -4,7 +4,8 @@ import { JobService } from "src/db/job.service";
 import { TaskService } from "src/db/task.service";
 import { UserService } from "src/db/user.service";
 import { MailmanService } from "src/mailman/mailman.service";
-import { taskStatus } from "utils/const";
+import { Telegraf } from "telegraf";
+import { actionMenuOption, moveEnum, taskStatus } from "utils/const";
 
 @Injectable()
 export class SchedulersService {
@@ -17,19 +18,40 @@ export class SchedulersService {
 
     @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })
     async sundayEve() {
-        //notification in chat about failers
+        
+        const pendingTasks = await this.taskService.getAllPendingTasks();
+        if (pendingTasks) {
+            for (const task of pendingTasks) {
+                await this.taskService.setTaskStatus(
+                    task._id,
+                    taskStatus.failed,
+                );
+            }
+        }
+        const jobs = await this.jobService.getAllJobs();
+        if (jobs) {
+            for (const job of jobs) {
+                await this.jobService.setNextUserOnDuty(
+                    job.name,
+                    actionMenuOption.moveUserFwd,
+                );
+                console.log(`Shift moved ffw for ${job.name}`);
+            }
+        }
     }
 
     @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
     async monday() {
-        await this.taskService.setTaskStatus(taskStatus.failed);
-        await this.jobService.setNextUserOnDutyForAll();
         await this.taskService.createTasks();
         const newTasks = await this.taskService.getAllPendingTasks();
-        await this.mailman.notifyAllChats(newTasks);
-        newTasks.forEach(async (task) => {
-            await this.mailman.sendMonPM(task);
-        });
+        if(newTasks) {
+            await this.mailman.notifyAllChats(newTasks);
+            newTasks.forEach(async (task) => {
+                await this.mailman.sendMonPM(task);
+            });
+        } else {
+            console.log("No new tasks found.")
+        }
     }
 
     @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
