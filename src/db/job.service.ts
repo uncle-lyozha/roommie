@@ -54,13 +54,21 @@ export class JobService {
         userName: string,
     ): Promise<void> {
         try {
-            console.log('HIIIi!')
             await this.jobModel.findByIdAndUpdate(
                 jobId,
                 { $pull: { users: userName } },
                 { new: true },
             );
             console.log(`User ${userName} removed from job ${jobId}.`);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async deleteJob(jobId: string) {
+        try {
+            await this.jobModel.findByIdAndDelete(jobId);
+            console.log(`Job with id ${jobId} deleted.`);
         } catch (err) {
             console.error(err);
         }

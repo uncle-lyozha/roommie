@@ -22,7 +22,8 @@ export enum actionMenuOption {
     addJob = "addJob",
     deleteJob = "deleteJob",
     exit = "exit",
-    null = "empty"
+    null = "empty",
+    confirm = "confirm"
 }
 
 export enum cbType {

@@ -1,25 +1,22 @@
 import {
     Action,
     Ctx,
-    InjectBot,
-    On,
     Sender,
     Update,
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType, MySessionType } from "src/db/db.types";
+import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { KeyboardService } from "src/services/keyboard.service";
-import { Telegraf } from "telegraf";
+import { Context } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
-import { actionMenuOption, cbType } from "utils/const";
+import { actionMenuOption } from "utils/const";
 
 @Wizard("menu")
 @Update()
 export class MenuWizard {
     constructor(
-        @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly keyboard: KeyboardService,
         private readonly jobService: JobService,
     ) {}
@@ -35,8 +32,8 @@ export class MenuWizard {
     @Action(actionMenuOption.addJob)
     async onAddJob(@Ctx() ctx: WizardContext) {
         this.job = null;
-        ctx.scene.enter("addnewjob");
         await ctx.scene.leave();
+        ctx.scene.enter("addnewjob");
     }
 
     @Action(/job/)
@@ -62,7 +59,6 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.exit)
-    // @WizardStep(5)
     async onExit(@Ctx() ctx: SceneContext) {
         this.job = null;
         await ctx.deleteMessage(ctx.callbackQuery.message.message_id);
@@ -70,7 +66,6 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.moveUserFwd)
-    // @WizardStep(6)
     async onNextShift(@Ctx() ctx: WizardContext) {
         await this.jobService.setNextUserOnDuty(
             this.job._id,
@@ -84,7 +79,6 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.moveUserBck)
-    // @WizardStep(7)
     async onPrevShift(@Ctx() ctx: WizardContext) {
         await this.jobService.setNextUserOnDuty(
             this.job._id,
@@ -97,56 +91,65 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.addUser)
-    // @WizardStep(8)
     async onAddUser(@Ctx() ctx: SceneContext) {
         const jobId = this.job._id;
-        await ctx.scene.enter("addusertojob", { jobId });
-        const msg = "Done.";
-        await this.keyboard.hideKeyboard(ctx);
-        await ctx.editMessageText(msg);
         await ctx.scene.leave();
+        await ctx.scene.enter("addusertojob", { jobId });
     }
 
     @Action(actionMenuOption.delUser)
-    // @WizardStep(9)
     async onDelUser(@Ctx() ctx: WizardContext) {
         const jobId = this.job._id;
-        await ctx.scene.enter("deluser", { jobId });
-        const msg = "Done.";
-        await this.keyboard.hideKeyboard(ctx);
-        await ctx.editMessageText(msg);
         await ctx.scene.leave();
+        await ctx.scene.enter("deluser", { jobId });
     }
 
     @Action(actionMenuOption.renameJob)
-    // @WizardStep(10)
     async onRename(@Ctx() ctx: WizardContext) {
-        // await ctx.scene.enter("renameJob", { id: this.job._id });
-        console.log("BYE12");
-        const msg = "Done.";
-        await this.keyboard.hideKeyboard(ctx);
-        await ctx.editMessageText(msg);
+        const jobId = this.job._id;
         await ctx.scene.leave();
+        await ctx.scene.enter("editJobName", { jobId });
     }
 
     @Action(actionMenuOption.editDescr)
     // @WizardStep(11)
     async onEditDescription(@Ctx() ctx: WizardContext) {
-        // await ctx.scene.enter("editDescription", { id: this.job._id });
-        console.log("BYE11");
-        const msg = "Done.";
-        await this.keyboard.hideKeyboard(ctx);
-        await ctx.editMessageText(msg);
+        const jobId = this.job._id;
         await ctx.scene.leave();
+        await ctx.scene.enter("updateDescr", { jobId });
     }
 
     @Action(actionMenuOption.deleteJob)
-    async onDelJob(@Ctx() ctx: WizardContext) {
-        console.log("BYE12");
-        // await ctx.scene.enter("delJob", { id: this.job._id });
-        const msg = "Done.";
-        await this.keyboard.hideKeyboard(ctx);
-        await ctx.editMessageText(msg);
-        await ctx.scene.leave();
+    async onDelJob(
+        @Ctx() ctx: WizardContext,
+        @Sender("id") userId: number,
+    ) {
+        const jobId = this.job._id;
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            await ctx.scene.leave();
+            await ctx.scene.enter("delJob", { jobId });    
+        } else {
+            const msg = "You are not authorised to do it."
+            await ctx.editMessageText(msg);
+            await ctx.scene.leave();
+        }
+
+    }
+
+    private async isAdmin(
+        chatId: number,
+        userId: number,
+        ctx: Context,
+    ): Promise<boolean> {
+        const chatMember = await ctx.telegram.getChatMember(chatId, userId);
+        if (
+            chatMember.status === "creator" ||
+            chatMember.status === "administrator"
+        ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -63,6 +63,27 @@ export class KeyboardService {
             },
         });
     }
+    
+    async showConfirm(@Ctx() ctx: Context, msg: string) {
+        await ctx.editMessageText(msg, {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: "Confirm",
+                            callback_data: actionMenuOption.confirm,
+                        },
+                    ],
+                    [
+                        {
+                            text: "Exit",
+                            callback_data: actionMenuOption.exit,
+                        },
+                    ],
+                ],
+            },
+        });
+    }
 
     async showEditMenuKeyboard(@Ctx() ctx: Context, jobId: string) {
         await ctx.editMessageText(
@@ -154,7 +175,7 @@ export class KeyboardService {
             const btn = [Markup.button.callback(user, "user:" + user)];
             buttons.push(btn);
         }
-        await ctx.reply(
+        await ctx.editMessageText(
             "Choose a user to delete from Job:",
             Markup.inlineKeyboard(buttons, { columns: 3 }),
         );

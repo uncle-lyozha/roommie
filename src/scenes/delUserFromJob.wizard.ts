@@ -38,14 +38,13 @@ export class delUserFromJob {
     
     @Action(/user/)
     async onUserList(@Ctx() ctx: WizardContext) {
-        console.log(ctx.scene.current);
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
         const userName = data.split(":")[1];
         console.log(this.job._id.toString())
         await this.jobService.deleteUserFromJob(this.job._id.toString(), userName);
         const pmMsg = `User ${userName} deleted from job "${this.job.name}".`;
-        await ctx.reply(pmMsg);
+        await ctx.editMessageText(pmMsg);
         await this.job.save();
         this.job = null;
         await ctx.scene.leave();

@@ -71,6 +71,7 @@ export class Commands {
         @Sender("id") id: number,
         @Sender("username") userName: string,
     ) {
+        userName = "@" + userName;
         const user = await this.userService.findUserByName(userName);
         if (user) {
             console.log("User already exists: \n" + user);
