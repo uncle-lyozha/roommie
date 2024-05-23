@@ -9,12 +9,14 @@ import { StoryCbQueryHandler } from "./story.handlers";
 import { addUserToJob } from "src/scenes/addUserToJob.wizard";
 import { SessionService } from "src/db/session.service";
 import { delUserFromJob } from "src/scenes/delUserFromJob.wizard";
+import { delJob } from "src/scenes/delJob.wizard";
+import { UpdateDescr } from "src/scenes/updateJobDescr.wizard";
+import { EditJobName } from "src/scenes/editJobName.wizard";
 
 @Module({
     imports: [DbModule],
     providers: [
         MailmanService,
-        
         StoryCbQueryHandler,
         KeyboardService,
         JobService,
@@ -23,6 +25,9 @@ import { delUserFromJob } from "src/scenes/delUserFromJob.wizard";
         addUserToJob,
         delUserFromJob,
         SessionService,
+        delJob,
+        UpdateDescr,
+        EditJobName,
     ],
 })
 export class MailmanModule {}

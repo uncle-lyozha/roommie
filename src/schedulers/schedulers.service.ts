@@ -16,57 +16,62 @@ export class SchedulersService {
         private readonly mailman: MailmanService,
     ) {}
 
-    @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })
-    async sundayEve() {
+    @Cron(CronExpression.EVERY_MINUTE, { timeZone: "Europe/Belgrade" }) 
+    async test() {
         
-        const pendingTasks = await this.taskService.getAllPendingTasks();
-        if (pendingTasks) {
-            for (const task of pendingTasks) {
-                await this.taskService.setTaskStatus(
-                    task._id,
-                    taskStatus.failed,
-                );
-            }
-        }
-        const jobs = await this.jobService.getAllJobs();
-        if (jobs) {
-            for (const job of jobs) {
-                await this.jobService.setNextUserOnDuty(
-                    job.name,
-                    actionMenuOption.moveUserFwd,
-                );
-                console.log(`Shift moved ffw for ${job.name}`);
-            }
-        }
     }
 
-    @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
-    async monday() {
-        await this.taskService.createTasks();
-        const newTasks = await this.taskService.getAllPendingTasks();
-        if(newTasks) {
-            await this.mailman.notifyAllChats(newTasks);
-            newTasks.forEach(async (task) => {
-                await this.mailman.sendMonPM(task);
-            });
-        } else {
-            console.log("No new tasks found.")
-        }
-    }
+    // @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })
+    // async sundayEve() {
+        
+    //     const pendingTasks = await this.taskService.getAllPendingTasks();
+    //     if (pendingTasks) {
+    //         for (const task of pendingTasks) {
+    //             await this.taskService.setTaskStatus(
+    //                 task._id,
+    //                 taskStatus.failed,
+    //             );
+    //         }
+    //     }
+    //     const jobs = await this.jobService.getAllJobs();
+    //     if (jobs) {
+    //         for (const job of jobs) {
+    //             await this.jobService.setNextUserOnDuty(
+    //                 job.name,
+    //                 actionMenuOption.moveUserFwd,
+    //             );
+    //             console.log(`Shift moved ffw for ${job.name}`);
+    //         }
+    //     }
+    // }
 
-    @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
-    async repeating() {
-        const tasks = await this.taskService.getAllPendingTasks();
-        tasks.forEach(async (task) => {
-            await this.mailman.sendMonPM(task);
-        });
-    }
+    // @Cron("0 12 * * 1", { timeZone: "Europe/Belgrade" })
+    // async monday() {
+    //     await this.taskService.createTasks();
+    //     const newTasks = await this.taskService.getAllPendingTasks();
+    //     if(newTasks) {
+    //         await this.mailman.notifyAllChats(newTasks);
+    //         newTasks.forEach(async (task) => {
+    //             await this.mailman.sendMonPM(task);
+    //         });
+    //     } else {
+    //         console.log("No new tasks found.")
+    //     }
+    // }
 
-    @Cron("0 12 * * 7", { timeZone: "Europe/Belgrade" })
-    async sunday() {
-        const tasks = await this.taskService.getAllPendingTasks();
-        tasks.forEach(async (task) => {
-            await this.mailman.sendFinalPm(task);
-        });
-    }
+    // @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
+    // async repeating() {
+    //     const tasks = await this.taskService.getAllPendingTasks();
+    //     tasks.forEach(async (task) => {
+    //         await this.mailman.sendMonPM(task);
+    //     });
+    // }
+
+    // @Cron("0 12 * * 7", { timeZone: "Europe/Belgrade" })
+    // async sunday() {
+    //     const tasks = await this.taskService.getAllPendingTasks();
+    //     tasks.forEach(async (task) => {
+    //         await this.mailman.sendFinalPm(task);
+    //     });
+    // }
 }

@@ -32,10 +32,10 @@ export class addNewJob {
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
-        this.job.chatId = ctx.chat.id;
+        this.job.chatId = ctx.chat.id; // ERROR [ExceptionsHandler] Cannot set properties of null (setting 'chatId') - when trying to add second job right after the first was added
         const pmMsg =
             "Please enter a unique job name (Guidline: use a verb-noun construction, e.x. 'Clean the Kitchen', 'Pay the bills'). You can edit it later.";
-        await ctx.reply(pmMsg);
+        await ctx.editMessageText(pmMsg);
         ctx.wizard.next();
     }
 
@@ -44,7 +44,7 @@ export class addNewJob {
     async onJobName(@Ctx() ctx: WizardContext) {
         const jobName = ctx.text;
         this.job.name = jobName;
-        const pmMsg = `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (without @), devided by a whitespase.`;
+        const pmMsg = `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (choose a chat member, starting to type @), devided by a whitespase.`;
         await ctx.reply(pmMsg);
         ctx.wizard.next();
     }
@@ -54,7 +54,8 @@ export class addNewJob {
     async onJobUsers(@Ctx() ctx: WizardContext) {
         const users = ctx.text;
         const invalidUsers = [];
-        for (const name of users.split(" ")) {
+        const names = users.split(" ");
+        for (const name of names) {
             const user = await this.userService.findUserByName(name);
             if (!user) {
                 invalidUsers.push(name);
@@ -64,9 +65,7 @@ export class addNewJob {
         }
         if (invalidUsers.length > 0) {
             const invalidUsersString = invalidUsers.join(", ");
-            const pmMsg = 
-                `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command).`
-            await ctx.reply(pmMsg);
+            const pmMsg = `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command). Please use the menu again.`;
             this.job = {
                 _id: "",
                 name: "",
@@ -75,12 +74,11 @@ export class addNewJob {
                 description: "",
                 currUserIndex: 0,
             };
-            this.job = null;
-            return ctx.scene.reenter();
+            await ctx.reply(pmMsg);
+            await ctx.scene.leave();
         }
 
-        const pmMsg = 
-            `Please enter a description for the new job (what a user on duty should do).`
+        const pmMsg = `Please enter a description for the new job (what a user on duty should do).`;
         await ctx.reply(pmMsg);
         ctx.wizard.next();
     }
@@ -90,9 +88,16 @@ export class addNewJob {
     async onJobDesc(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
         this.job.description = ctx.text;
         await this.jobService.addNewJob(this.job);
-        const pmMsg = `New Job "${this.job.name}" added.`
+        const pmMsg = `New Job "${this.job.name}" added.`;
         await ctx.reply(pmMsg);
-        this.job = null;
+        this.job = {
+            _id: "",
+            name: "",
+            chatId: 0,
+            users: [],
+            description: "",
+            currUserIndex: 0,
+        };
         await ctx.scene.leave();
     }
 }

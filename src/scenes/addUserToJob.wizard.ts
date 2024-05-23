@@ -1,5 +1,10 @@
-import { Ctx, InjectBot, On, Sender, Wizard, WizardStep } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
+import {
+    Ctx,
+    InjectBot,
+    On,
+    Wizard,
+    WizardStep,
+} from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { Telegraf } from "telegraf";
@@ -9,7 +14,6 @@ import { customStateType } from "utils/utils.types";
 @Wizard("addusertojob")
 export class addUserToJob {
     constructor(
-        @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly jobService: JobService,
         private readonly userService: UserService,
     ) {}
@@ -17,21 +21,23 @@ export class addUserToJob {
     private job;
 
     @WizardStep(1)
-    async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
+    async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
         const jobId = sceneState.jobId;
         this.job = await this.jobService.getJobById(jobId);
-        const pmMsg = `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (without @), devided by a whitespase. Current list of users:\n ${this.job.users}`;
-        await ctx.reply(pmMsg);
+        const pmMsg = `Please enter a list of users who will be doing the job, iteratively taking the shifts. The list must contain only Telegram usernames (choose a chat member, starting to type @), devided by a whitespase.`
+        await ctx.editMessageText(pmMsg);
         ctx.wizard.next();
     }
 
     @WizardStep(2)
     @On("text")
-    async onNewUsers(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
+    async onNewUsers(@Ctx() ctx: WizardContext) {
         const users = ctx.text;
         const invalidUsers = [];
-        for (const name of users.split(" ")) {
+        const names = users.split(" ");
+        
+        for (const name of names) {
             const user = await this.userService.findUserByName(name);
             if (!user) {
                 invalidUsers.push(name);
@@ -45,10 +51,10 @@ export class addUserToJob {
             const invalidUsersString = invalidUsers.join(", ");
             const pmMsg = `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command).`;
             await ctx.reply(pmMsg);
-            return ctx.wizard.back();
+            return ctx.scene.reenter();
         }
         await this.job.save();
-        this.job = null;
+        this.job = {};
         await ctx.scene.leave();
     }
 }
