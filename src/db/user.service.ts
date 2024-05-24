@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { User } from "./schemas/user.schema";
 import { UserType } from "./db.types";
 
@@ -25,6 +25,15 @@ export class UserService {
             return user;
         } else {
             console.error(`User ${name} not found in DB.`);
+        }
+    }
+    
+    async findUserById(id: ObjectId): Promise<UserType> {
+        const user: UserType = await this.userModel.findById(id)
+        if (user) {
+            return user;
+        } else {
+            console.error(`User ${id} not found in DB.`);
         }
     }
 }

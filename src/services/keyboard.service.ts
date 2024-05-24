@@ -3,15 +3,16 @@ import { Ctx, InjectBot } from "nestjs-telegraf";
 import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { SessionService } from "src/db/session.service";
+import { UserService } from "src/db/user.service";
 import { Context, Markup, Telegraf } from "telegraf";
-import { actionMenuOption, cbType } from "utils/const";
+import { actionMenuOption } from "utils/const";
 
 @Injectable()
 export class KeyboardService {
     constructor(
         @InjectBot() private readonly bot: Telegraf<Context>,
         private readonly jobService: JobService,
-        private readonly sessionService: SessionService,
+        private readonly userService: UserService,
     ) {}
 
     async showJobsKeyboard(@Ctx() ctx: Context): Promise<void> {
@@ -25,17 +26,15 @@ export class KeyboardService {
             Markup.button.callback("Add a Job", actionMenuOption.addJob),
         ];
         const exitBtn = [Markup.button.callback("Exit", actionMenuOption.exit)];
+        const adminBtn = [
+            Markup.button.callback("Personel only", actionMenuOption.exit),
+        ];
 
         for (const job of jobs) {
-            const btn = [
-                Markup.button.callback(
-                    job.name,
-                    "job:" + job._id,
-                ),
-            ];
+            const btn = [Markup.button.callback(job.name, "job:" + job._id)];
             buttons.push(btn);
         }
-        buttons.push(jobBtn, exitBtn);
+        buttons.push(jobBtn, adminBtn, exitBtn);
 
         await ctx.reply(
             "Choose a job to see info or edit:",
@@ -63,7 +62,7 @@ export class KeyboardService {
             },
         });
     }
-    
+
     async showConfirm(@Ctx() ctx: Context, msg: string) {
         await ctx.editMessageText(msg, {
             reply_markup: {
@@ -92,78 +91,36 @@ export class KeyboardService {
                 [
                     Markup.button.callback(
                         "Move shift ➡️",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.moveUserFwd,
-                        // ),
                         actionMenuOption.moveUserFwd,
                     ),
                     Markup.button.callback(
                         "Move shift ⬅️",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.moveUserBck,
-                        // ),
                         actionMenuOption.moveUserBck,
                     ),
                     Markup.button.callback(
                         "Add user",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.addUser,
-                        // ),
                         actionMenuOption.addUser,
                     ),
                     Markup.button.callback(
                         "Delete user",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.delUser,
-                        // ),
                         actionMenuOption.delUser,
                     ),
                     Markup.button.callback(
                         "Rename job",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.renameJob,
-                        // ),
                         actionMenuOption.renameJob,
                     ),
                     Markup.button.callback(
                         "Change description",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.editDescr,
-                        // ),
                         actionMenuOption.editDescr,
                     ),
                     Markup.button.callback(
                         "Delete this job",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        //     actionMenuOption.deleteJob,
-                        // ),
                         actionMenuOption.deleteJob,
                     ),
-                    Markup.button.callback(
-                        "Exit menu",
-                        // await this.sessionService.createSession(
-                        //     cbType.edit,
-                        //     jobId,
-                        // ),
-                        actionMenuOption.exit,
-                    ),
+                    Markup.button.callback("Exit menu", actionMenuOption.exit),
                 ],
                 {
-                    columns: 1,
+                    columns: 2,
                 },
             ),
         );
@@ -171,8 +128,13 @@ export class KeyboardService {
 
     async showUserList(@Ctx() ctx: Context, job: JobType) {
         let buttons = [];
-        for (const user of job.users) {
-            const btn = [Markup.button.callback(user, "user:" + user)];
+        for (const userName of job.users) {
+            const user = await this.userService.findUserByName(
+                userName.userName,
+            );
+            const btn = [
+                Markup.button.callback(user.userName, "user:" + user._id),
+            ];
             buttons.push(btn);
         }
         await ctx.editMessageText(

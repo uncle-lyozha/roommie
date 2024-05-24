@@ -28,16 +28,14 @@ export class TaskService {
         }
         for (const job of jobs) {
             let userInChargeIndex = job.currUserIndex;
-            let userInCharge = job.users[userInChargeIndex];
-            let user: UserType =
-                await this.userService.findUserByName(userInCharge);
+            let user: UserType = job.users[userInChargeIndex];
             let chatId = job.chatId;
             let TGId = user.tgId;
             let area = job.name;
             let description = job.description;
             let status = taskStatus.new;
             let newTask = new this.taskModel({
-                userName: userInCharge,
+                userName: user.userName,
                 chatId: chatId,
                 TGId: TGId,
                 area: area,

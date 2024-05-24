@@ -42,10 +42,6 @@ export class Commands {
             },
             { command: "whoisonduty", description: "Who is on duty today?" },
             {
-                command: "add_new_job",
-                description: "Add a new job for scheduling.",
-            },
-            {
                 command: "tasks",
                 description: "Create tasks for this chat.",
             },
@@ -59,8 +55,8 @@ export class Commands {
                     "Hit this command to add yourself to the users list.",
             },
         ];
-        this.bot.telegram.deleteMyCommands();
-        this.bot.telegram.setMyCommands(commands, {
+        await this.bot.telegram.deleteMyCommands();
+        await this.bot.telegram.setMyCommands(commands, {
             scope: { type: "all_group_chats" },
         });
     }
@@ -96,11 +92,6 @@ export class Commands {
     @Command("menu")
     async showRooms(@Ctx() ctx: SceneContext) {
         await ctx.scene.enter("menu");
-    }
-
-    @Command("addnewjob")
-    async startScene(@Ctx() ctx: SceneContext) {
-        await ctx.scene.enter("addnewjob");
     }
 
     @Command("whoisonduty")
