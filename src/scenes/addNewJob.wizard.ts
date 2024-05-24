@@ -6,7 +6,7 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
+import { JobType, UserType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { Telegraf } from "telegraf";
@@ -21,6 +21,8 @@ export class addNewJob {
         private readonly jobService: JobService,
     ) {}
 
+    private readonly ø = Object.create(null)
+    // private job: JobType = this.ø
     private job: JobType = {
         _id: "",
         name: "",
@@ -56,16 +58,17 @@ export class addNewJob {
         const invalidUsers = [];
         const names = users.split(" ");
         for (const name of names) {
-            const user = await this.userService.findUserByName(name);
+            const user: UserType = await this.userService.findUserByName(name);
             if (!user) {
                 invalidUsers.push(name);
             } else {
-                this.job.users.push(user.userName);
+                this.job.users.push(user);
             }
         }
         if (invalidUsers.length > 0) {
             const invalidUsersString = invalidUsers.join(", ");
-            const pmMsg = `Users: ${invalidUsersString} not found. Please add the usernames to the list of chat users (user must use /start command). Please use the menu again.`;
+            const pmMsg = `Users: ${invalidUsersString} are not found. Please add the usernames to the list of chat users (user must use /start command). Please enter the menu again.`;
+            // this.job = this.ø
             this.job = {
                 _id: "",
                 name: "",
@@ -74,13 +77,13 @@ export class addNewJob {
                 description: "",
                 currUserIndex: 0,
             };
-            await ctx.reply(pmMsg);
             await ctx.scene.leave();
+            await ctx.reply(pmMsg);
+        } else {
+            const pmMsg = `Please enter a description for the new job (what a user on duty should do).`;
+            await ctx.reply(pmMsg);
+            ctx.wizard.next();
         }
-
-        const pmMsg = `Please enter a description for the new job (what a user on duty should do).`;
-        await ctx.reply(pmMsg);
-        ctx.wizard.next();
     }
 
     @WizardStep(4)
@@ -90,6 +93,7 @@ export class addNewJob {
         await this.jobService.addNewJob(this.job);
         const pmMsg = `New Job "${this.job.name}" added.`;
         await ctx.reply(pmMsg);
+        // this.job = this.ø
         this.job = {
             _id: "",
             name: "",

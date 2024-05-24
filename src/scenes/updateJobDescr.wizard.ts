@@ -19,7 +19,7 @@ export class UpdateDescr {
         const sceneState = ctx.wizard.state as customStateType;
         const jobId = sceneState.jobId;
         this.job = (await this.jobService.getJobById(jobId)) as JobType;
-        const pmMsg = `Please enter a new description for this Job.`;
+        const pmMsg = `Please enter a new description for this Job. Current description is: \n${this.job.description}`;
         await ctx.editMessageText(pmMsg);
         ctx.wizard.next();
     }

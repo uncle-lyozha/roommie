@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ObjectId } from "mongoose";
 
 @Schema()
 export class Job {
@@ -8,9 +9,9 @@ export class Job {
     @Prop({ required: true })
     chatId: number;
 
-    @Prop({ type: [{ type: String }] })
-    users: string[];
-    
+    @Prop({ required: true, default: [] })
+    users: ObjectId[];
+
     @Prop({ required: true })
     description: string;
 

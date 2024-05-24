@@ -47,19 +47,14 @@ export class JobService {
         }
     }
 
-    async deleteUserFromJob(
-        jobId: string,
-        // chatId: number,
-        // jobName: string,
-        userName: string,
-    ): Promise<void> {
+    async deleteUserFromJob(jobId: string, userId: string): Promise<void> {
         try {
             await this.jobModel.findByIdAndUpdate(
                 jobId,
-                { $pull: { users: userName } },
+                { $pull: { users: { _id: userId } } },
                 { new: true },
             );
-            console.log(`User ${userName} removed from job ${jobId}.`);
+            console.log(`User ${userId} removed from job ${jobId}.`);
         } catch (err) {
             console.error(err);
         }
@@ -127,7 +122,7 @@ export class JobService {
     }
 
     async getJobById(jobId: string): Promise<JobType> {
-        const job: JobType = await this.jobModel.findById(jobId);
+        const job: JobType = await this.jobModel.findById(jobId).populate("users");
         return job;
     }
 
