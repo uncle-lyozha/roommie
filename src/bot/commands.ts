@@ -9,7 +9,6 @@ import {
     Command,
 } from "nestjs-telegraf";
 import { TaskService } from "src/db/task.service";
-import { TaskType } from "src/db/db.types";
 import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Context, Telegraf } from "telegraf";
@@ -34,7 +33,7 @@ export class Commands {
 
     async initializeBotCommands() {
         const commands = [
-            { command: "help", description: "How this all work?" },
+            { command: "help", description: "How this all works?" },
             {
                 command: "menu",
                 description:
@@ -43,11 +42,12 @@ export class Commands {
             { command: "whoisonduty", description: "Who is on duty today?" },
             {
                 command: "tasks",
-                description: "Create tasks for this chat.",
+                description: "*Admin only* Create tasks for this chat.",
             },
             {
                 command: "notify",
-                description: "Send private notifications.",
+                description:
+                    "*Admin only* Send private notifications to users on duty.",
             },
             {
                 command: "start",
@@ -108,12 +108,6 @@ export class Commands {
             );
             return;
         }
-        // let tasksToSend: TaskType[];
-        // tasks.forEach((task) => {
-        //     if (task.chatId === chatId) {
-        //         tasksToSend.push(task);
-        //     }
-        // });
         await this.mailman.sendChatDutyNotification(chatId, tasks);
     }
 

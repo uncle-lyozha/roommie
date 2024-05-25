@@ -143,6 +143,19 @@ export class KeyboardService {
         );
     }
 
+    async showAssessUserPoll(
+        @Ctx() ctx: Context,
+        chatId: number,
+        userName: string,
+        taskName: string,
+    ) {
+        await ctx.telegram.sendPoll(
+            chatId,
+            `How do you assess ${userName}'s job: ${taskName}?`,
+            ["🦍", "🍄", "💩", "👾", "🍆"],
+        );
+    }
+
     async hideKeyboard(@Ctx() context: Context) {
         await context.editMessageReplyMarkup({
             reply_markup: { remove_keyboard: true },

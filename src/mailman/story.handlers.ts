@@ -3,6 +3,7 @@ import { MySessionType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { SessionService } from "src/db/session.service";
 import { TaskService } from "src/db/task.service";
+import { KeyboardService } from "src/services/keyboard.service";
 import { Context, Telegraf } from "telegraf";
 import { taskStatus } from "utils/const";
 
@@ -13,6 +14,7 @@ export class StoryCbQueryHandler {
         private readonly jobService: JobService,
         private readonly taskService: TaskService,
         private readonly sessionService: SessionService,
+        private readonly keyboard: KeyboardService,
     ) {}
 
     @On("callback_query")
@@ -53,11 +55,12 @@ export class StoryCbQueryHandler {
                 task.TGId,
                 "Awesome! You're the best. Around!",
             );
-            // await ctx.telegram.sendPoll(
-            //     ctx.chat.id,
-            //     `How do you assess ${task.userName}'s job: ${task.area}?`,
-            //     ["🦍", "🍄", "💩"],
-            // ); // send to general chat
+            await this.keyboard.showAssessUserPoll(
+                ctx,
+                task.chatId,
+                task.userName,
+                task.area,
+            );
         }
 
         if (nextStep === taskStatus.snoozed) {
