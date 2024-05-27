@@ -5,7 +5,7 @@ import { JobService } from "src/db/job.service";
 import { SessionService } from "src/db/session.service";
 import { UserService } from "src/db/user.service";
 import { Context, Markup, Telegraf } from "telegraf";
-import { actionMenuOption } from "utils/const";
+import { actionMenuOption, adminMenuOption } from "utils/const";
 
 @Injectable()
 export class KeyboardService {
@@ -27,7 +27,7 @@ export class KeyboardService {
         ];
         const exitBtn = [Markup.button.callback("Exit", actionMenuOption.exit)];
         const adminBtn = [
-            Markup.button.callback("Personel only", actionMenuOption.exit),
+            Markup.button.callback("Personel only", actionMenuOption.adminMenu),
         ];
 
         for (const job of jobs) {
@@ -122,6 +122,29 @@ export class KeyboardService {
                 {
                     columns: 2,
                 },
+            ),
+        );
+    }
+
+    async showAdminMenu(@Ctx() ctx: Context) {
+        await ctx.editMessageText(
+            "Choose your action",
+            Markup.inlineKeyboard(
+                [
+                    Markup.button.callback(
+                        "Create tasks for this group chat",
+                        adminMenuOption.createTasks,
+                    ),
+                    Markup.button.callback(
+                        "Notify users on duty in PM",
+                        adminMenuOption.sendNotifications,
+                    ),
+                    // Markup.button.callback(
+                    //     "Send a custom msg to this group chat",
+                    //     adminMenuOption.sendChatMessage
+                    // ),
+                ],
+                { columns: 3 },
             ),
         );
     }

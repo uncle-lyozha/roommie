@@ -37,7 +37,7 @@ export class SchedulersService {
         if (jobs) {
             for (const job of jobs) {
                 await this.jobService.setNextUserOnDuty(
-                    job.name,
+                    job._id,
                     actionMenuOption.moveUserFwd,
                 );
                 console.log(`Shift moved ffw for ${job.name}`);

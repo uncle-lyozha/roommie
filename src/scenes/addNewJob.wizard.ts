@@ -21,7 +21,7 @@ export class addNewJob {
         private readonly jobService: JobService,
     ) {}
 
-    private readonly ø = Object.create(null)
+    private readonly ø = Object.create(null);
     // private job: JobType = this.ø
     private job: JobType = {
         _id: "",
@@ -67,7 +67,7 @@ export class addNewJob {
         }
         if (invalidUsers.length > 0) {
             const invalidUsersString = invalidUsers.join(", ");
-            const pmMsg = `Users: ${invalidUsersString} are not found. Please add the usernames to the list of chat users (user must use /start command). Please enter the menu again.`;
+            const pmMsg = `Users: ${invalidUsersString} are not found. Please add the usernames to the list of chat users (user must use /start command) and try to create a job again.`;
             // this.job = this.ø
             this.job = {
                 _id: "",
