@@ -41,18 +41,14 @@ export class Commands {
             },
             { command: "whoisonduty", description: "Who is on duty today?" },
             {
-                command: "tasks",
-                description: "*Admin only* Create tasks for this chat.",
-            },
-            {
-                command: "notify",
-                description:
-                    "*Admin only* Send private notifications to users on duty.",
-            },
-            {
                 command: "start",
                 description:
                     "Hit this command to add yourself to the users list.",
+            },
+            {
+                command: "sendChatMessage",
+                description:
+                    "Admins only. Go to a private chat with Roommie to compose with him a message to thisId? group chat.",
             },
         ];
         await this.bot.telegram.deleteMyCommands();
@@ -113,42 +109,13 @@ export class Commands {
 
     // Commands available only to chat creator/admin
 
-    @Command("tasks")
+    @Command("sendChatMessage")
     async createTasks(
         @Ctx() ctx: Context,
         @Sender("id") userId: number,
         @Sender("username") userName: string,
     ) {
-        const chatId = ctx.chat.id;
-        if (await this.isAdmin(chatId, userId, ctx)) {
-            await this.taskService.createTasks(chatId);
-        } else {
-            await ctx.reply(
-                `${userName} is not authorised to use this command.`,
-            );
-        }
-    }
-
-    @Command("notify")
-    async notify(
-        @Ctx() ctx: Context,
-        @Sender("id") userId: number,
-        @Sender("username") userName: string,
-    ) {
-        const chatId = ctx.chat.id;
-        if (await this.isAdmin(chatId, userId, ctx)) {
-            const tasks = await this.taskService.getTasksByStatus(
-                chatId,
-                taskStatus.pending,
-            );
-            for (const task of tasks) {
-                await this.mailman.sendMonPM(task);
-            }
-        } else {
-            await ctx.reply(
-                `${userName} is not authorised to use this command.`,
-            );
-        }
+        
     }
 
     @Command("test")
