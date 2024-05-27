@@ -21,9 +21,16 @@ export enum actionMenuOption {
     editDescr = "editDescr",
     addJob = "addJob",
     deleteJob = "deleteJob",
+    adminMenu = "adminMenu",
     exit = "exit",
     null = "empty",
     confirm = "confirm"
+}
+
+export enum adminMenuOption {
+    createTasks = "createTasks",
+    sendNotifications = "sendNotifications",
+    sendChatMessage = "sendMsg",
 }
 
 export enum cbType {

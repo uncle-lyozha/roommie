@@ -145,11 +145,17 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.editDescr)
-    // @WizardStep(11)
     async onEditDescription(@Ctx() ctx: WizardContext) {
         const jobId = this.job._id;
         await ctx.scene.leave();
         await ctx.scene.enter("updateDescr", { jobId });
+    }
+
+    @Action(actionMenuOption.adminMenu)
+    async onAdminMenu(@Ctx() ctx: WizardContext) {
+        const jobId = this.job._id;
+        await ctx.scene.leave();
+        await ctx.scene.enter("adminMenu", { jobId });
     }
 
     @Action(actionMenuOption.deleteJob)
