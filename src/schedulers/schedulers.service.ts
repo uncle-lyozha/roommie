@@ -1,15 +1,18 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { InjectBot } from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
 import { TaskService } from "src/db/task.service";
 import { UserService } from "src/db/user.service";
 import { MailmanService } from "src/mailman/mailman.service";
 import { Telegraf } from "telegraf";
+import { SceneContext } from "telegraf/scenes";
 import { actionMenuOption, moveEnum, taskStatus } from "utils/const";
 
 @Injectable()
 export class SchedulersService {
     constructor(
+        @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly userServise: UserService,
         private readonly jobService: JobService,
         private readonly taskService: TaskService,
@@ -18,7 +21,7 @@ export class SchedulersService {
 
     // @Cron(CronExpression.EVERY_MINUTE, { timeZone: "Europe/Belgrade" }) 
     // async test() {
-        
+    //     await this.bot.context.scene.enter("speak")
     // }
 
     @Cron(CronExpression.EVERY_WEEK, { timeZone: "Europe/Belgrade" })

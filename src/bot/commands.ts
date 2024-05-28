@@ -147,26 +147,27 @@ export class Commands {
         if (await this.isAdmin(chatId, userId, ctx)) {
             // const testTasks = await this.db.getPendingTasks();
             // await this.db.setNextUserOnDuty();
-            const tasks = await this.taskService.getTasksByStatus(
-                chatId,
-                taskStatus.pending,
-            );
-            if (tasks.length === 0) {
-                await this.bot.telegram.sendMessage(
-                    chatId,
-                    "No tasks left. Well done everybody!",
-                );
-                return;
-            }
-            for (const task of tasks) {
-                await this.mailman.sendMonPM(task);
-            }
+            // const tasks = await this.taskService.getTasksByStatus(
+            //     chatId,
+            //     taskStatus.pending,
+            // );
+            // if (tasks.length === 0) {
+            //     await this.bot.telegram.sendMessage(
+            //         chatId,
+            //         "No tasks left. Well done everybody!",
+            //     );
+            //     return;
+            // }
+            // for (const task of tasks) {
+            //     await this.mailman.sendMonPM(task);
+            // }
             // tasks.forEach(async (task) => {
             //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
             // });
             // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
             // await this.db.findUserByName("Lyozha");
             // await ctx.scene.enter('test')
+            
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
