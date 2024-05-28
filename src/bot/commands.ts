@@ -45,11 +45,11 @@ export class Commands {
                 description:
                     "Hit this command to add yourself to the users list.",
             },
-            {
-                command: "sendChatMessage",
-                description:
-                    "Admins only. Go to a private chat with Roommie to compose with him a message to thisId? group chat.",
-            },
+            // {
+            //     command: "sendChatMessage",
+            //     description:
+            //         "Admins only. Go to a private chat with Roommie to compose with him a message to thisId? group chat.",
+            // },
         ];
         await this.bot.telegram.deleteMyCommands();
         await this.bot.telegram.setMyCommands(commands, {
@@ -78,10 +78,7 @@ export class Commands {
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        const msg = `
-        First, all users must click "Start" button in private message with Roommie so the bot
-        could send private messages and a user's ID will be saved.
-        `;
+        const msg = "First, all users must click 'Start' button in private message with Roommie so the bot could send private messages and a user's ID will be saved. Then, in your group chat call the menu command and schedule a job to perform. Then an admin can use a personnel only menu to form tasks and send private notifications. Each week at 00:00 on Sunday users will change each other, at 12:00 on Mon Roommie will notify users on duty, on Thu he will remind and on Sun there will be a final reminder.";
         await ctx.reply(msg);
     }
 
@@ -109,13 +106,35 @@ export class Commands {
 
     // Commands available only to chat creator/admin
 
-    @Command("sendChatMessage")
-    async createTasks(
-        @Ctx() ctx: Context,
-        @Sender("id") userId: number,
-        @Sender("username") userName: string,
-    ) {
-        
+    // @Command("sendChatMessage")
+    // async createTasks(
+    //     @Ctx() ctx: Context,
+    //     @Sender("id") userId: number,
+    //     @Sender("username") userName: string,
+    // ) {
+
+    // }
+
+    @Command("speak")
+    async speak(@Ctx() ctx: SceneContext, @Sender("id") userId: number) {
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            await ctx.scene.enter("speak");
+        } else {
+            const msg = "You are not authorised to do it.";
+            await ctx.editMessageText(msg);
+        }
+    }
+
+    @Command("chatId")
+    async chatId(@Ctx() ctx: SceneContext, @Sender("id") userId: number) {
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            await ctx.reply(`${ctx.chat.id}`);
+        } else {
+            const msg = "You are not authorised to do it.";
+            await ctx.editMessageText(msg);
+        }
     }
 
     @Command("test")
