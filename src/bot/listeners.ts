@@ -32,19 +32,16 @@ export class UpdateListeners {
         const newMembers =
             "new_chat_members" in update ? update.new_chat_members : null;
         for (const user of newMembers) {
-            const userName = "@" + user.username;
-            const savedUser = await this.userService.findUserByName(userName);
+            const userTgId = user.id;
+            const savedUser = await this.userService.findUserByTgId(userTgId);
             if (savedUser) {
                 console.log("User already exists: " + user.username);
                 await ctx.reply(
-                    `Welcome back ${userName}. I remember you, you are ok.`,
+                    `Welcome back ${user.username}. I remember you, you are ok, c'mon in.`,
                 );
             } else {
-                await ctx.reply(`Greetings ${userName} and welcome!`);
-                const newUser = await this.userService.createUser(
-                    userName,
-                    user.id,
-                );
+                await ctx.reply(`Greetings ${user.username} and welcome!`);
+                await this.userService.createUser(user.username, user.id);
             }
         }
     }
