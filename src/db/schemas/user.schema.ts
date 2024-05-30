@@ -6,7 +6,7 @@ export class User {
     userName: string;
 
     @Prop({ required: true })
-    tgId: string;
+    tgId: number;
 
     @Prop()
     rating: number;

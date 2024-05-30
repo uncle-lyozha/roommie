@@ -21,8 +21,6 @@ export class addNewJob {
         private readonly jobService: JobService,
     ) {}
 
-    private readonly ø = Object.create(null);
-    // private job: JobType = this.ø
     private job: JobType = {
         _id: "",
         name: "",

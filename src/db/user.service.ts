@@ -36,4 +36,13 @@ export class UserService {
             console.error(`User ${id} not found in DB.`);
         }
     }
+
+    async findUserByTgId(id: number): Promise<UserType> {
+        const user: UserType = await this.userModel.findOne({tgId: id})
+        if (user) {
+            return user;
+        } else {
+            console.error(`User ${id} not found in DB.`);
+        }
+    }
 }
