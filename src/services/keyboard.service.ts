@@ -98,6 +98,10 @@ export class KeyboardService {
                         actionMenuOption.moveUserBck,
                     ),
                     Markup.button.callback(
+                        "Swap users",
+                        actionMenuOption.swap,
+                    ),
+                    Markup.button.callback(
                         "Add user",
                         actionMenuOption.addUser,
                     ),
@@ -160,8 +164,8 @@ export class KeyboardService {
             ];
             buttons.push(btn);
         }
-        await ctx.editMessageText(
-            "Choose a user to delete from Job:",
+        await ctx.reply(
+            "This job's users:",
             Markup.inlineKeyboard(buttons, { columns: 3 }),
         );
     }

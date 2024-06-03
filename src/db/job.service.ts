@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import mongoose, { Model, ObjectId, Schema } from "mongoose";
 import { Job } from "./schemas/job.schema";
-import { JobType } from "./db.types";
+import { JobType, UserType } from "./db.types";
 import { actionMenuOption } from "utils/const";
 
 @Injectable()
@@ -122,7 +122,9 @@ export class JobService {
     }
 
     async getJobById(jobId: string): Promise<JobType> {
-        const job: JobType = await this.jobModel.findById(jobId).populate("users");
+        const job: JobType = await this.jobModel
+            .findById(jobId)
+            .populate("users");
         return job;
     }
 
@@ -144,5 +146,28 @@ export class JobService {
         console.log(
             `Next user to shift in ${job.name} is ${job.users[nextIndex]}.`,
         );
+    }
+
+    async swapUsers(jobId: string, user1Id: string, user2Id: string) {
+        const job = (await this.jobModel.findById(jobId));
+        if (!job) {
+            console.log("Job not found");
+        }
+
+        const users: any = job.users;
+        const index1 = users.findIndex((userId) => userId._id.toString() === user1Id);
+        const index2 = users.findIndex((userId) => userId._id.toString() === user2Id);
+        
+        if (index1 === -1 || index2 === -1) {
+            console.log ("One or both users not found in the job")
+        }
+
+        const temp = users[index1];
+        users[index1] = users[index2];
+        users[index2] = temp;
+        job.users = users;
+        
+        await job.save();
+        return job;
     }
 }

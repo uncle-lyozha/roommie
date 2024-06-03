@@ -15,7 +15,7 @@ export class Task {
     TGId: number;
 
     @Prop({required: true})
-    area: string;
+    jobName: string;
 
     @Prop({required: true})
     description: string;

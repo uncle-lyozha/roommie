@@ -13,6 +13,7 @@ import { delJob } from "src/scenes/delJob.wizard";
 import { UpdateDescr } from "src/scenes/updateJobDescr.wizard";
 import { EditJobName } from "src/scenes/editJobName.wizard";
 import { AdminMenuWizard } from "src/scenes/adminMenu.wizard";
+import { SwapUsersWizard } from "src/scenes/swapUsers.wizard";
 
 @Module({
     imports: [DbModule],
@@ -29,7 +30,8 @@ import { AdminMenuWizard } from "src/scenes/adminMenu.wizard";
         delJob,
         UpdateDescr,
         EditJobName,
-        AdminMenuWizard
+        AdminMenuWizard,
+        SwapUsersWizard
     ],
 })
 export class MailmanModule {}
