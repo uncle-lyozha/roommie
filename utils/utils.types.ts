@@ -31,3 +31,11 @@ export type CbDataType = {
 export type customStateType = {
     jobId: string;
 };
+
+export type newChatMemberType = {
+    id: number;
+    is_bot: boolean;
+    first_name: string;
+    username: string;
+    language_code: string;
+};

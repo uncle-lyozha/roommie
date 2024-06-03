@@ -41,19 +41,15 @@ export class Commands {
             },
             { command: "whoisonduty", description: "Who is on duty today?" },
             {
-                command: "tasks",
-                description: "*Admin only* Create tasks for this chat.",
-            },
-            {
-                command: "notify",
-                description:
-                    "*Admin only* Send private notifications to users on duty.",
-            },
-            {
                 command: "start",
                 description:
                     "Hit this command to add yourself to the users list.",
             },
+            // {
+            //     command: "sendChatMessage",
+            //     description:
+            //         "Admins only. Go to a private chat with Roommie to compose with him a message to thisId? group chat.",
+            // },
         ];
         await this.bot.telegram.deleteMyCommands();
         await this.bot.telegram.setMyCommands(commands, {
@@ -82,10 +78,7 @@ export class Commands {
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        const msg = `
-        First, all users must click "Start" button in private message with Roommie so the bot
-        could send private messages and a user's ID will be saved.
-        `;
+        const msg = "First, all users must click 'Start' button in private message with Roommie so the bot could send private messages and a user's ID will be saved. Then, in your group chat call the menu command and schedule a job to perform. Then an admin can use a personnel only menu to form tasks and send private notifications. Each week at 00:00 on Sunday users will change each other, at 12:00 on Mon Roommie will notify users on duty, on Thu he will remind and on Sun there will be a final reminder.";
         await ctx.reply(msg);
     }
 
@@ -113,41 +106,34 @@ export class Commands {
 
     // Commands available only to chat creator/admin
 
-    @Command("tasks")
-    async createTasks(
-        @Ctx() ctx: Context,
-        @Sender("id") userId: number,
-        @Sender("username") userName: string,
-    ) {
+    // @Command("sendChatMessage")
+    // async createTasks(
+    //     @Ctx() ctx: Context,
+    //     @Sender("id") userId: number,
+    //     @Sender("username") userName: string,
+    // ) {
+
+    // }
+
+    @Command("speak")
+    async speak(@Ctx() ctx: SceneContext, @Sender("id") userId: number) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            await this.taskService.createTasks(chatId);
+            await ctx.scene.enter("speak");
         } else {
-            await ctx.reply(
-                `${userName} is not authorised to use this command.`,
-            );
+            const msg = "You are not authorised to do it.";
+            await ctx.editMessageText(msg);
         }
     }
 
-    @Command("notify")
-    async notify(
-        @Ctx() ctx: Context,
-        @Sender("id") userId: number,
-        @Sender("username") userName: string,
-    ) {
+    @Command("chatId")
+    async chatId(@Ctx() ctx: SceneContext, @Sender("id") userId: number) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            const tasks = await this.taskService.getTasksByStatus(
-                chatId,
-                taskStatus.pending,
-            );
-            for (const task of tasks) {
-                await this.mailman.sendMonPM(task);
-            }
+            await ctx.reply(`${ctx.chat.id}`);
         } else {
-            await ctx.reply(
-                `${userName} is not authorised to use this command.`,
-            );
+            const msg = "You are not authorised to do it.";
+            await ctx.editMessageText(msg);
         }
     }
 
@@ -161,26 +147,27 @@ export class Commands {
         if (await this.isAdmin(chatId, userId, ctx)) {
             // const testTasks = await this.db.getPendingTasks();
             // await this.db.setNextUserOnDuty();
-            const tasks = await this.taskService.getTasksByStatus(
-                chatId,
-                taskStatus.pending,
-            );
-            if (tasks.length === 0) {
-                await this.bot.telegram.sendMessage(
-                    chatId,
-                    "No tasks left. Well done everybody!",
-                );
-                return;
-            }
-            for (const task of tasks) {
-                await this.mailman.sendMonPM(task);
-            }
+            // const tasks = await this.taskService.getTasksByStatus(
+            //     chatId,
+            //     taskStatus.pending,
+            // );
+            // if (tasks.length === 0) {
+            //     await this.bot.telegram.sendMessage(
+            //         chatId,
+            //         "No tasks left. Well done everybody!",
+            //     );
+            //     return;
+            // }
+            // for (const task of tasks) {
+            //     await this.mailman.sendMonPM(task);
+            // }
             // tasks.forEach(async (task) => {
             //     await this.db.setTaskStatus(taskStatus.failed, task._id.toString());
             // });
             // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
             // await this.db.findUserByName("Lyozha");
             // await ctx.scene.enter('test')
+            
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
