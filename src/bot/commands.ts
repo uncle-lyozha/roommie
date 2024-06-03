@@ -78,7 +78,8 @@ export class Commands {
 
     @Help()
     async help(@Ctx() ctx: Context) {
-        const msg = "First, all users must click 'Start' button in private message with Roommie so the bot could send private messages and a user's ID will be saved. Then, in your group chat call the menu command and schedule a job to perform. Then an admin can use a personnel only menu to form tasks and send private notifications. Each week at 00:00 on Sunday users will change each other, at 12:00 on Mon Roommie will notify users on duty, on Thu he will remind and on Sun there will be a final reminder.";
+        const msg =
+            "First, all users must click 'Start' button in private message with Roommie so the bot could send private messages and a user's ID will be saved. Then, in your group chat call the menu command and schedule a job to perform. Then an admin can use a personnel only menu to form tasks and send private notifications. Each week at 00:00 on Sunday users will change each other, at 12:00 on Mon Roommie will notify users on duty, on Thu he will remind and on Sun there will be a final reminder.";
         await ctx.reply(msg);
     }
 
@@ -167,7 +168,6 @@ export class Commands {
             // await this.db.addUserToRoom(chatId, "WC", "@Lyozha2");
             // await this.db.findUserByName("Lyozha");
             // await ctx.scene.enter('test')
-            
         } else {
             await ctx.reply(
                 `${userName} is not authorised to use this command.`,
