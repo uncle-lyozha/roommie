@@ -31,14 +31,14 @@ export class TaskService {
             let user: UserType = job.users[userInChargeIndex];
             let chatId = job.chatId;
             let TGId = user.tgId;
-            let area = job.name;
+            let jobName = job.name;
             let description = job.description;
             let status = taskStatus.new;
             let newTask = new this.taskModel({
                 userName: user.userName,
                 chatId: chatId,
                 TGId: TGId,
-                area: area,
+                jobName: jobName,
                 description: description,
                 status: status,
                 date: new Date().toISOString(),

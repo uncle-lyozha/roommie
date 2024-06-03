@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { ObjectId, Schema } from "mongoose";
 import {  taskStatus } from "utils/const";
 
 export type TaskType = {
@@ -14,7 +14,7 @@ export type TaskType = {
     storyStep: string;
 };
 
-export type UserType = {
+export type UserType =  {
     _id: ObjectId;
     userName: string;
     tgId: number;
@@ -28,6 +28,7 @@ export type JobType = {
     users: UserType[];
     description: string;
     currUserIndex: number;
+    // save(): Promise<void>;
 };
 
 export type MySessionType = {

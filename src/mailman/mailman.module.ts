@@ -13,6 +13,7 @@ import { delJob } from "src/scenes/delJob.wizard";
 import { UpdateDescr } from "src/scenes/updateJobDescr.wizard";
 import { EditJobName } from "src/scenes/editJobName.wizard";
 import { AdminMenuWizard } from "src/scenes/adminMenu.wizard";
+import { SwapUsersWizard } from "src/scenes/swapUsers.wizard";
 import { SpeakWizard } from "src/scenes/speak.wizard";
 
 @Module({
@@ -31,6 +32,7 @@ import { SpeakWizard } from "src/scenes/speak.wizard";
         UpdateDescr,
         EditJobName,
         AdminMenuWizard,
+        SwapUsersWizard
         SpeakWizard
     ],
 })

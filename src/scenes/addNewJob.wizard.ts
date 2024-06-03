@@ -21,7 +21,8 @@ export class addNewJob {
         private readonly jobService: JobService,
     ) {}
 
-    private job: JobType = {
+
+    private job = {
         _id: "",
         name: "",
         chatId: 0,

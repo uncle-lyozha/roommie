@@ -31,6 +31,8 @@ export class delUserFromJob {
     async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
         const jobId = sceneState.jobId;
+        const msg = "Choose a user to delete from job";
+        await ctx.editMessageText(msg);
         this.job = await this.jobService.getJobById(jobId.toString());
         await this.keyboard.showUserList(ctx, this.job);
         ctx.wizard.next();
@@ -45,7 +47,14 @@ export class delUserFromJob {
         const pmMsg = `User ${userId} deleted from job "${this.job.name}".`;
         await ctx.editMessageText(pmMsg);
         await this.job.save();
-        this.job = null;
+        this.job = {
+            _id: "",
+            name: "",
+            chatId: 0,
+            users: [],
+            description: "",
+            currUserIndex: 0,
+        };
         await ctx.scene.leave();
     }
 }

@@ -15,6 +15,7 @@ export enum actionMenuOption {
     edit = "edit",
     moveUserFwd = "moveFwd",
     moveUserBck = "moveBck",
+    swap = "swap",
     addUser = "addUser",
     delUser = "delUser",
     renameJob = "renameJob",

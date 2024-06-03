@@ -51,7 +51,6 @@ export class MenuWizard {
         const data = "data" in cbQuery ? cbQuery.data : null;
         const jobId = data.split(":")[1];
         this.job = await this.jobService.getJobById(jobId);
-        console.log(this.job);
         const currUserName = this.job.users[this.job.currUserIndex].userName;
         const userNameArray = this.job.users.map((user) => user.userName);
         const msg = `
@@ -121,6 +120,13 @@ export class MenuWizard {
         await this.keyboard.hideKeyboard(ctx);
         await ctx.editMessageText(msg);
         await ctx.scene.leave();
+    }
+
+    @Action(actionMenuOption.swap)
+    async onSwap(@Ctx() ctx: SceneContext) {
+        const jobId = this.job._id;
+        await ctx.scene.leave();
+        await ctx.scene.enter("swapusers", { jobId });
     }
 
     @Action(actionMenuOption.addUser)
