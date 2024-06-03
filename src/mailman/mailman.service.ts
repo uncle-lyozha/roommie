@@ -20,14 +20,14 @@ export class MailmanService {
 
     async notifyAllChats(tasks: TaskType[]): Promise<void> {
         tasks.forEach(async (task) => {
-            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.jobName} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(task.chatId, message);
         });
     }
 
     async sendChatDutyNotification(chatId: number, tasks: TaskType[]) {
         tasks.forEach(async (task) => {
-            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.area} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
+            const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.jobName} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
             await this.bot.telegram.sendMessage(chatId, message);
         });
     }
@@ -37,7 +37,7 @@ export class MailmanService {
         const currentStep = task.status;
         let job = "";
         if (task.status === taskStatus.new) {
-            job = task.area;
+            job = task.jobName;
         }
         const { buttons, message } = this.script[currentStep];
         for (let msg of message) {

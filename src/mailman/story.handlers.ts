@@ -38,18 +38,18 @@ export class StoryCbQueryHandler {
         if (nextStep === taskStatus.pending) {
             await this.taskService.setTaskStatus(taskId, taskStatus.pending);
             const task = await this.taskService.getTaskById(taskId);
-            console.log(`${task.userName} accepted his task: ${task.area}.`);
+            console.log(`${task.userName} accepted his task: ${task.jobName}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
-                `Great! Here's what you should do (please read carefuly the instructions):\n${task.area}\n${task.description}`,
+                `Great! Here's what you should do (please read carefuly the instructions):\n${task.jobName}\n${task.description}`,
             );
         }
 
         if (nextStep === taskStatus.done) {
             await this.taskService.setTaskStatus(taskId, taskStatus.done);
             const task = await this.taskService.getTaskById(taskId);
-            console.log(`${task.userName} has done his job: ${task.area}.`);
+            console.log(`${task.userName} has done his job: ${task.jobName}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,
@@ -59,14 +59,14 @@ export class StoryCbQueryHandler {
                 ctx,
                 task.chatId,
                 task.userName,
-                task.area,
+                task.jobName,
             );
         }
 
         if (nextStep === taskStatus.snoozed) {
             await this.taskService.setTaskStatus(taskId, taskStatus.snoozed);
             const task = await this.taskService.getTaskById(taskId);
-            console.log(`${task.userName} snoozed his task: ${task.area}.`);
+            console.log(`${task.userName} snoozed his task: ${task.jobName}.`);
             await this.bot.telegram.deleteMessage(task.TGId, ctx.msgId);
             await this.bot.telegram.sendMessage(
                 task.TGId,

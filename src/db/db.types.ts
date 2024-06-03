@@ -1,12 +1,12 @@
 import { ObjectId, Schema } from "mongoose";
-import {  taskStatus } from "utils/const";
+import { taskStatus } from "utils/const";
 
 export type TaskType = {
     _id: string;
     userName: string;
     chatId: number;
     TGId: number;
-    area: string;
+    jobName: string;
     description: string;
     status: taskStatus;
     date: Date;
@@ -14,7 +14,7 @@ export type TaskType = {
     storyStep: string;
 };
 
-export type UserType =  {
+export type UserType = {
     _id: ObjectId;
     userName: string;
     tgId: number;
@@ -35,4 +35,4 @@ export type MySessionType = {
     type: string;
     id: string;
     option: string;
-}
+};
