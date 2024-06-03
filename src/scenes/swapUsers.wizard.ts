@@ -25,19 +25,19 @@ export class SwapUsersWizard {
         await ctx.editMessageText(msg);
         this.job = await this.jobService.getJobById(jobId.toString());
 
-        if (this.job.users.length() < 2) {
-            this.job = {
-                _id: "",
-                name: "",
-                chatId: 0,
-                users: [],
-                description: "",
-                currUserIndex: 0,
-            };
-            const msg = "There's only one user to this job, nothing to swap.";
-            await ctx.editMessageText(msg);
-            await ctx.scene.leave();
-        }
+        // if (this.job.users.length() < 2) {
+        //     this.job = {
+        //         _id: "",
+        //         name: "",
+        //         chatId: 0,
+        //         users: [],
+        //         description: "",
+        //         currUserIndex: 0,
+        //     };
+        //     const msg = "There's only one user to this job, nothing to swap.";
+        //     await ctx.editMessageText(msg);
+        //     await ctx.scene.leave();
+        // }
 
         await this.keyboard.showUserList(ctx, this.job);
         ctx.wizard.next();
