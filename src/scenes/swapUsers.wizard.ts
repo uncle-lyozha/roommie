@@ -26,9 +26,17 @@ export class SwapUsersWizard {
         this.job = await this.jobService.getJobById(jobId.toString());
 
         if (this.job.users.length() < 2) {
-            const msg = "There's only one user to this job, nothing to swap."
+            this.job = {
+                _id: "",
+                name: "",
+                chatId: 0,
+                users: [],
+                description: "",
+                currUserIndex: 0,
+            };
+            const msg = "There's only one user to this job, nothing to swap.";
             await ctx.editMessageText(msg);
-            await ctx.scene.leave()
+            await ctx.scene.leave();
         }
 
         await this.keyboard.showUserList(ctx, this.job);
@@ -53,15 +61,18 @@ export class SwapUsersWizard {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
         this.user2Id = data.split(":")[1];
-        const updatedJob = await this.jobService.swapUsers(this.job._id, this.user1Id, this.user2Id);
+        const updatedJob = await this.jobService.swapUsers(
+            this.job._id,
+            this.user1Id,
+            this.user2Id,
+        );
         if (updatedJob) {
             const msg = "Users has been swaped.";
             this.job.save();
             await ctx.editMessageText(msg);
         } else {
-            const errMsgGeneral = "Error while processing. Try again later."
+            const errMsgGeneral = "Error while processing. Try again later.";
             await ctx.editMessageText(errMsgGeneral);
-
         }
         this.job = {
             _id: "",
@@ -71,6 +82,6 @@ export class SwapUsersWizard {
             description: "",
             currUserIndex: 0,
         };
-        await ctx.scene.leave()
+        await ctx.scene.leave();
     }
 }
