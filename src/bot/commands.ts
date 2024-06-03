@@ -72,7 +72,7 @@ export class Commands {
             );
         } else {
             await ctx.reply(`Welcome ${userName}`);
-            const newUser = await this.userService.createUser(userName, id);
+            await this.userService.createUser(userName, id);
         }
     }
 
