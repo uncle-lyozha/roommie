@@ -76,6 +76,19 @@ export class MenuWizard {
         }
     }
 
+    @Action(actionMenuOption.alterShift)
+    async onAlterShift(@Ctx() ctx: WizardContext, @Sender("id") userId: number) {
+        const chatId = ctx.chat.id;
+        if (await this.isAdmin(chatId, userId, ctx)) {
+            await this.keyboard.showAlterShiftMenu(ctx);
+            ctx.wizard.next();
+        } else {
+            const msg = "You are not authorised to do it.";
+            await ctx.editMessageText(msg);
+            await ctx.scene.leave();
+        }
+    }
+
     @Action(actionMenuOption.exit)
     async onExit(@Ctx() ctx: SceneContext) {
         this.job = {
@@ -122,6 +135,13 @@ export class MenuWizard {
         await ctx.scene.leave();
     }
 
+    @Action(actionMenuOption.assignUser)
+    async onAssignUser(@Ctx() ctx: SceneContext) {
+        const jobId = this.job._id;
+        await ctx.scene.leave();
+        await ctx.scene.enter("assignuser", { jobId });
+    }
+    
     @Action(actionMenuOption.swap)
     async onSwap(@Ctx() ctx: SceneContext) {
         const jobId = this.job._id;

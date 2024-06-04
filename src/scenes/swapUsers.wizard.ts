@@ -1,6 +1,4 @@
-import mongoose, { ObjectId, Schema } from "mongoose";
 import { Action, Ctx, Wizard, WizardStep } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { WizardContext } from "telegraf/scenes";
@@ -21,7 +19,8 @@ export class SwapUsersWizard {
     async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
         const jobId = sceneState.jobId;
-        const msg = "Choose the first user you want to swap shifts with.";
+        const msg =
+            "You are about to change the line-up for this job. Choose the first user you want to swap shifts with.";
         await ctx.editMessageText(msg);
         this.job = await this.jobService.getJobById(jobId.toString());
 

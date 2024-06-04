@@ -3,7 +3,7 @@ import { JobType, TaskType, UserType } from "./db.types";
 import { moveEnum, taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
 import { Task } from "./schemas/task.schema";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { Job } from "./schemas/job.schema";
 import { UserService } from "./user.service";
 
@@ -12,7 +12,6 @@ export class TaskService {
     constructor(
         @InjectModel("Task") private readonly taskModel: Model<Task>,
         @InjectModel("Job") private readonly jobModel: Model<Job>,
-        private readonly userService: UserService,
     ) {}
 
     async createTasks(chatId?: number): Promise<void> {
@@ -50,7 +49,26 @@ export class TaskService {
         }
     }
 
-    async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
+    async createTaskForJobName(jobName: string, userInChargeIndex: number) {
+        const job: JobType = await this.jobModel.findOne({ name: jobName });
+        const user: UserType = job.users[userInChargeIndex];
+        let newTask = new this.taskModel({
+            userName: user.userName,
+            chatId: job.chatId,
+            TGId: user.tgId,
+            jobName: jobName,
+            description: job.description,
+            status: taskStatus.new,
+            date: new Date().toISOString(),
+            snoozedTimes: 0,
+            storyStep: "monday",
+        });
+        const task: TaskType = (await newTask.save()).toObject() as TaskType;
+        console.log("New task added to db: \n" + task);
+        return task;
+    }
+
+    async setTaskStatus(taskId: ObjectId, status: taskStatus): Promise<void> {
         try {
             if (status === taskStatus.new) {
                 return;
@@ -94,11 +112,9 @@ export class TaskService {
         }
     }
 
-    async setNextDuty(taskId: string, dir: moveEnum) {
+    async setNextDuty(taskId: string, dir: moveEnum) {}
 
-    }
-
-    async getTaskById(id: string): Promise<TaskType> {
+    async getTaskById(id: ObjectId): Promise<TaskType> {
         const task: TaskType | null = await this.taskModel.findById(id);
         if (task) {
             return task;
@@ -153,5 +169,9 @@ export class TaskService {
         await this.taskModel.findByIdAndUpdate(taskId, {
             storyStep: step,
         });
+    }
+
+    async deleteTaskByJobName(jobName: string) {
+        await this.taskModel.findOneAndDelete({ jobName: jobName });
     }
 }
