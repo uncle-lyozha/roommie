@@ -90,16 +90,8 @@ export class KeyboardService {
             Markup.inlineKeyboard(
                 [
                     Markup.button.callback(
-                        "Move shift ➡️",
-                        actionMenuOption.moveUserFwd,
-                    ),
-                    Markup.button.callback(
-                        "Move shift ⬅️",
-                        actionMenuOption.moveUserBck,
-                    ),
-                    Markup.button.callback(
-                        "Swap users",
-                        actionMenuOption.swap,
+                        "Change the shift",
+                        actionMenuOption.alterShift,
                     ),
                     Markup.button.callback(
                         "Add user",
@@ -118,8 +110,40 @@ export class KeyboardService {
                         actionMenuOption.editDescr,
                     ),
                     Markup.button.callback(
-                        "Delete this job",
+                        "Delete this job ❌",
                         actionMenuOption.deleteJob,
+                    ),
+                    Markup.button.callback("Exit menu", actionMenuOption.exit),
+                ],
+                {
+                    columns: 2,
+                },
+            ),
+        );
+    }
+
+    async showAlterShiftMenu(@Ctx() ctx: Context) {
+        const msg =
+            "Here you can assign a user for a duty or swap two users in their line of shifts:";
+        await ctx.editMessageText(
+            msg,
+            Markup.inlineKeyboard(
+                [
+                    Markup.button.callback(
+                        "Assign a user ",
+                        actionMenuOption.assignUser,
+                    ),
+                    Markup.button.callback(
+                        "Swap users 🔄",
+                        actionMenuOption.swap,
+                    ),
+                    Markup.button.callback(
+                        "Move shift ➡️",
+                        actionMenuOption.moveUserFwd,
+                    ),
+                    Markup.button.callback(
+                        "Move shift ⬅️",
+                        actionMenuOption.moveUserBck,
                     ),
                     Markup.button.callback("Exit menu", actionMenuOption.exit),
                 ],

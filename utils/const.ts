@@ -13,6 +13,8 @@ export enum moveEnum {
 
 export enum actionMenuOption {
     edit = "edit",
+    assignUser = "assignUser",
+    alterShift = "alterShift",
     moveUserFwd = "moveFwd",
     moveUserBck = "moveBck",
     swap = "swap",

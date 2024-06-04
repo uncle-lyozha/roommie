@@ -1,50 +1,58 @@
-import {
-    Action,
-    Ctx,
-    InjectBot,
-    On,
-    Sender,
-    Update,
-    Wizard,
-    WizardStep,
-} from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
+import { Action, Ctx, InjectBot, Wizard, WizardStep } from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
-import { UserService } from "src/db/user.service";
+import { TaskService } from "src/db/task.service";
+import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
 import { customStateType } from "utils/utils.types";
 
-@Wizard("deluser")
-export class delUserFromJob {
+@Wizard("assignuser")
+export class AssignUserWizard {
     constructor(
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly jobService: JobService,
+        private readonly taskService: TaskService,
         private readonly keyboard: KeyboardService,
+        private readonly mailman: MailmanService,
     ) {}
 
-    // private job: JobType; // fix types
     private job;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
         const jobId = sceneState.jobId;
-        const msg = "Choose a user to delete from job";
+        const msg =
+            "Choose a user you want to assign to be on duty for the job this week.";
         await ctx.editMessageText(msg);
         this.job = await this.jobService.getJobById(jobId);
         await this.keyboard.showUserList(ctx, this.job);
+
         ctx.wizard.next();
     }
-    
+
     @Action(/user/)
     async onUserList(@Ctx() ctx: WizardContext) {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
         const userId = data.split(":")[1];
-        await this.jobService.deleteUserFromJob(this.job._id.toString(), userId);
-        const pmMsg = `User ${userId} deleted from job "${this.job.name}".`;
+        const userIndex = this.job.users.findIndex(
+            (user) => user._id.toString() === userId,
+        );
+        await this.taskService.deleteTaskByJobName(this.job.name);
+        const newTask = await this.taskService.createTaskForJobName(
+            this.job.name,
+            userIndex,
+        );
+
+        if (newTask) {
+            await this.mailman.sendMonPM(newTask);
+        } else {
+            const errMsgGeneral = "Error while processing. Try again later.";
+            await ctx.editMessageText(errMsgGeneral);
+        }
+        const pmMsg = `New task "${newTask.jobName} created for ${newTask.userName}"`;
         await ctx.editMessageText(pmMsg);
         await this.job.save();
         this.job = {
