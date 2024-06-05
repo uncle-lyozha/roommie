@@ -49,14 +49,13 @@ export class TaskService {
         }
     }
 
-    async createTaskForJobName(jobName: string, userInChargeIndex: number) {
-        const job: JobType = await this.jobModel.findOne({ name: jobName });
-        const user: UserType = job.users[userInChargeIndex];
+    async createTaskForJob(job: JobType) {
+        const currentUser = job.users[job.currUserIndex];
         let newTask = new this.taskModel({
-            userName: user.userName,
+            userName: currentUser.userName,
             chatId: job.chatId,
-            TGId: user.tgId,
-            jobName: jobName,
+            TGId: currentUser.tgId,
+            jobName: job.name,
             description: job.description,
             status: taskStatus.new,
             date: new Date().toISOString(),
@@ -111,8 +110,6 @@ export class TaskService {
             console.error(err);
         }
     }
-
-    async setNextDuty(taskId: string, dir: moveEnum) {}
 
     async getTaskById(id: ObjectId): Promise<TaskType> {
         const task: TaskType | null = await this.taskModel.findById(id);
@@ -171,7 +168,18 @@ export class TaskService {
         });
     }
 
-    async deleteTaskByJobName(jobName: string) {
-        await this.taskModel.findOneAndDelete({ jobName: jobName });
+    async deleteAllTasksForJob(jobName: string) {
+        await this.taskModel.deleteMany({
+            jobName: jobName,
+            status: {
+                $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
+            },
+        });
+        console.log(`All pending tasks for ${jobName}`)
+    }
+
+    async deleteTaskById(taskId: string) {
+        await this.taskModel.findByIdAndDelete(taskId);
+        console.log(`TaskId ${taskId} deleted.`);
     }
 }

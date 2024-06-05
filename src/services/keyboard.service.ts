@@ -130,7 +130,7 @@ export class KeyboardService {
             Markup.inlineKeyboard(
                 [
                     Markup.button.callback(
-                        "Assign a user ",
+                        "Assign a user",
                         actionMenuOption.assignUser,
                     ),
                     Markup.button.callback(

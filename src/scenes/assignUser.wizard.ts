@@ -36,23 +36,21 @@ export class AssignUserWizard {
     async onUserList(@Ctx() ctx: WizardContext) {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
-        const userId = data.split(":")[1];
-        const userIndex = this.job.users.findIndex(
+        const userId: string = data.split(":")[1];
+        const userIndex: number = this.job.users.findIndex(
             (user) => user._id.toString() === userId,
         );
-        await this.taskService.deleteTaskByJobName(this.job.name);
-        const newTask = await this.taskService.createTaskForJobName(
-            this.job.name,
-            userIndex,
-        );
-
+        await this.jobService.setUserOnDuty(this.job._id, userIndex);
+        // suggest list of tasks to delete
+        await this.taskService.deleteAllTasksForJob(this.job.name);
+        const newTask = await this.taskService.createTaskForJob(this.job);
         if (newTask) {
             await this.mailman.sendMonPM(newTask);
         } else {
             const errMsgGeneral = "Error while processing. Try again later.";
             await ctx.editMessageText(errMsgGeneral);
         }
-        const pmMsg = `New task "${newTask.jobName} created for ${newTask.userName}"`;
+        const pmMsg = `New task "${newTask.jobName}" created for ${newTask.userName}`;
         await ctx.editMessageText(pmMsg);
         await this.job.save();
         this.job = {

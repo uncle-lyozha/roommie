@@ -33,14 +33,14 @@ export class MenuWizard {
     };
 
     @WizardStep(1)
-    async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
+    async onEnter(@Ctx() ctx: WizardContext) {
         await this.keyboard.showJobsKeyboard(ctx);
         ctx.wizard.next();
     }
 
     @Action(actionMenuOption.addJob)
     async onAddJob(@Ctx() ctx: WizardContext) {
-        this.job = null;
+        // this.job = null;
         await ctx.scene.leave();
         ctx.scene.enter("addnewjob");
     }
@@ -77,7 +77,10 @@ export class MenuWizard {
     }
 
     @Action(actionMenuOption.alterShift)
-    async onAlterShift(@Ctx() ctx: WizardContext, @Sender("id") userId: number) {
+    async onAlterShift(
+        @Ctx() ctx: WizardContext,
+        @Sender("id") userId: number,
+    ) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
             await this.keyboard.showAlterShiftMenu(ctx);
@@ -141,7 +144,7 @@ export class MenuWizard {
         await ctx.scene.leave();
         await ctx.scene.enter("assignuser", { jobId });
     }
-    
+
     @Action(actionMenuOption.swap)
     async onSwap(@Ctx() ctx: SceneContext) {
         const jobId = this.job._id;

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import {
     Action,
     Ctx,
@@ -37,13 +38,19 @@ export class delUserFromJob {
         await this.keyboard.showUserList(ctx, this.job);
         ctx.wizard.next();
     }
-    
+
     @Action(/user/)
     async onUserList(@Ctx() ctx: WizardContext) {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
-        const userId = data.split(":")[1];
-        await this.jobService.deleteUserFromJob(this.job._id.toString(), userId);
+        const userIdString = data.split(":")[1];
+        const userId = new Types.ObjectId(userIdString);
+        console.log(userId);
+        const updatedJob = await this.jobService.deleteUserFromJob(
+            this.job._id,
+            userId,
+        );
+        console.log(updatedJob);
         const pmMsg = `User ${userId} deleted from job "${this.job.name}".`;
         await ctx.editMessageText(pmMsg);
         await this.job.save();

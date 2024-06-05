@@ -1,6 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, ObjectId, Schema } from "mongoose";
+import mongoose, {
+    Model,
+    Mongoose,
+    ObjectId,
+    Schema,
+    SchemaTypes,
+    Types,
+} from "mongoose";
 import { Job } from "./schemas/job.schema";
 import { JobType, UserType } from "./db.types";
 import { actionMenuOption } from "utils/const";
@@ -32,29 +39,31 @@ export class JobService {
 
     async addUserToJob(
         chatId: number,
-        jobName: string,
-        userName: string,
+        jobId: Types.ObjectId,
+        userId: Types.ObjectId,
     ): Promise<void> {
         try {
             await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
-                { $push: { users: userName } },
+                { _id: jobId, chatId: chatId },
+                { $push: { users: userId } },
                 { new: true },
             );
-            console.log(`User ${userName} added to ${jobName}.`);
+            console.log(`User ${userId} added to ${jobId}.`);
         } catch (err) {
             console.error(err);
         }
     }
 
-    async deleteUserFromJob(jobId: string, userId: string): Promise<void> {
+    async deleteUserFromJob(jobId: string, userId: Types.ObjectId) {
         try {
-            await this.jobModel.findByIdAndUpdate(
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
                 jobId,
                 { $pull: { users: { _id: userId } } },
                 { new: true },
             );
             console.log(`User ${userId} removed from job ${jobId}.`);
+
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
@@ -148,25 +157,36 @@ export class JobService {
         );
     }
 
+    async setUserOnDuty(jobId: string, userIndex: number) {
+        const updatedJob = await this.jobModel.findByIdAndUpdate(jobId, {
+            currUserIndex: userIndex,
+        });
+        return updatedJob;
+    }
+
     async swapUsers(jobId: string, user1Id: string, user2Id: string) {
-        const job = (await this.jobModel.findById(jobId));
+        const job = await this.jobModel.findById(jobId);
         if (!job) {
             console.log("Job not found");
         }
 
         const users: any = job.users;
-        const index1 = users.findIndex((userId) => userId._id.toString() === user1Id);
-        const index2 = users.findIndex((userId) => userId._id.toString() === user2Id);
-        
+        const index1 = users.findIndex(
+            (userId) => userId._id.toString() === user1Id,
+        );
+        const index2 = users.findIndex(
+            (userId) => userId._id.toString() === user2Id,
+        );
+
         if (index1 === -1 || index2 === -1) {
-            console.log ("One or both users not found in the job")
+            console.log("One or both users not found in the job");
         }
 
         const temp = users[index1];
         users[index1] = users[index2];
         users[index2] = temp;
         job.users = users;
-        
+
         await job.save();
         return job;
     }

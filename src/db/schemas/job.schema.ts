@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { ObjectId, Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
+
+export type JobDocument = HydratedDocument<Job>;
 
 @Schema()
 export class Job {
@@ -9,9 +11,8 @@ export class Job {
     @Prop({ required: true })
     chatId: number;
 
-    @Prop({ required: true, default: [] })
-    users: ObjectId[];
-    // users: { type: Types.ObjectId, ref: 'User' }[];
+    @Prop({ type: [{ type: Types.ObjectId, ref: "User" }], default: [] })
+    users: Types.ObjectId[];
 
     @Prop({ required: true })
     description: string;

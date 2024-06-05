@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import {
     Ctx,
     InjectBot,
@@ -5,6 +6,7 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
+import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { Telegraf } from "telegraf";
@@ -18,7 +20,7 @@ export class addUserToJob {
         private readonly userService: UserService,
     ) {}
 
-    private job;
+    private job: JobType;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
@@ -36,12 +38,15 @@ export class addUserToJob {
         const users = ctx.text;
         const invalidUsers = [];
         const names = users.split(" ");
+        const chatId = ctx.chat.id
+        const jobId = new Types.ObjectId(this.job.id)
         
         for (const name of names) {
             const user = await this.userService.findUserByName(name);
             if (!user) {
                 invalidUsers.push(name);
             } else {
+                await this.jobService.addUserToJob(chatId, this.job.id, user._id)
                 this.job.users.push(user.userName);
                 const pmMsg = `User ${user.userName} added to ${this.job.name}.`;
                 await ctx.reply(pmMsg);
