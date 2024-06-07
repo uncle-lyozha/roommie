@@ -27,7 +27,7 @@ export class UserService {
         }
     }
     
-    async findUserById(id: ObjectId): Promise<UserType> {
+    async findUserById(id: string): Promise<UserType> {
         const user: UserType = await this.userModel.findById(id)
         if (user) {
             return user;

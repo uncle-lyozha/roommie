@@ -37,9 +37,9 @@ export class delJob {
 
     @Action(actionMenuOption.confirm)
     async onConfirm(@Ctx() ctx: WizardContext) {
-        await this.jobService.deleteJob(this.jobId);
+        const result = await this.jobService.deleteJob(this.jobId);
         await this.taskService.deleteAllTasksForJob(this.jobId);
-        const msg = "Job and tasks assossiated with it has been deleted.";
+        const msg = `Job and it's tasks has been deleted: ` + result.name;
         ctx.editMessageText(msg);
         await ctx.scene.leave();
     }

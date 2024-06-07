@@ -2,9 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Session, TSession } from "./schemas/session.schema";
 import { Model } from "mongoose";
+import { ISession } from "./session.inteface";
 
 @Injectable()
-export class SessionService {
+export class SessionService implements ISession {
     constructor(
         @InjectModel("Session") private readonly sessionModel: Model<Session>,
     ) {}

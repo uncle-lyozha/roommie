@@ -78,8 +78,8 @@ export class addNewJob {
     @On("text")
     async onJobDesc(@Ctx() ctx: WizardContext) {
         this.job.description = ctx.text;
-        await this.jobService.addNewJob(this.job);
-        const pmMsg = `New Job "${this.job.name}" added.`;
+        const newJob = await this.jobService.addNewJob(this.job);
+        const pmMsg = `New job "${newJob.name}" added.`;
         await ctx.reply(pmMsg);
         this.job = {
             name: "",

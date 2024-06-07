@@ -1,23 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import mongoose, {
-    Model,
-    Mongoose,
-    ObjectId,
-    Schema,
-    SchemaTypes,
-    Types,
-} from "mongoose";
-import { Job, JobType } from "./schemas/job.schema";
+import { Model } from "mongoose";
+import { Job, JobDocument, JobType } from "./schemas/job.schema";
 import { actionMenuOption } from "utils/const";
 import { UserType } from "./schemas/user.schema";
 import { TJobDto } from "utils/utils.types";
+import { UserService } from "./user.service";
+import { IJob } from "./job.interface";
 
 @Injectable()
-export class JobService {
-    constructor(@InjectModel("Job") private readonly jobModel: Model<Job>) {}
+export class JobService implements IJob {
+    constructor(
+        @InjectModel("Job") private readonly jobModel: Model<Job>,
+        private readonly userService: UserService,
+    ) {}
 
-    async addNewJob(job: TJobDto) {
+    async addNewJob(job: TJobDto): Promise<JobDocument> {
         try {
             const name = job.name;
             const chatId = job.chatId;
@@ -39,7 +37,7 @@ export class JobService {
         }
     }
 
-    async addUserToJob(jobId: string, user: UserType) {
+    async addUserToJob(jobId: string, user: UserType): Promise<JobDocument> {
         try {
             const updatedJob: JobType = await this.jobModel
                 .findByIdAndUpdate(
@@ -59,47 +57,55 @@ export class JobService {
         }
     }
 
-    async deleteUserFromJob(jobId: string, userId: Types.ObjectId) {
+    async deleteUserFromJob(jobId: string, userId: string): Promise<UserType> {
         try {
-            const updatedJob = await this.jobModel.findByIdAndUpdate(
-                jobId,
-                {
-                    $pull: { users: { _id: userId } },
-                    $set: { currUserIndex: 0 },
-                },
-                { new: true },
+            const user: UserType = await this.userService.findUserById(userId);
+            const updatedJob: JobDocument =
+                await this.jobModel.findByIdAndUpdate(
+                    jobId,
+                    {
+                        $pull: { users: { _id: userId } },
+                        $set: { currUserIndex: 0 },
+                    },
+                    { new: true },
+                );
+            console.log(
+                `User ${user.userName} removed from job ${updatedJob.name}.`,
             );
-            console.log(`User ${userId} removed from job ${jobId}.`);
-            return updatedJob;
+            return user;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async deleteJob(jobId: string) {
+    async deleteJob(jobId: string): Promise<JobDocument> {
         try {
-            await this.jobModel.findByIdAndDelete(jobId);
-            console.log(`Job with id ${jobId} deleted.`);
+            const result = await this.jobModel.findByIdAndDelete(jobId);
+            console.log(`Job "${result.name}" deleted.`);
+            return result;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async editJobName(jobId: string, jobNewName: string) {
+    async editJobName(jobId: string, jobNewName: string): Promise<JobDocument> {
         try {
             const updatedJob = await this.jobModel.findByIdAndUpdate(
                 jobId,
                 { $set: { name: jobNewName } },
                 { new: true },
             );
-            console.log(`Job name updated to ${jobNewName}.`);
+            console.log(`Job name updated to "${updatedJob.name}".`);
             return updatedJob;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async editJobDescription(jobId: string, jobNewDescr: string) {
+    async editJobDescription(
+        jobId: string,
+        jobNewDescr: string,
+    ): Promise<JobDocument> {
         try {
             const updatedJob = await this.jobModel.findByIdAndUpdate(
                 jobId,
@@ -139,13 +145,11 @@ export class JobService {
         return job;
     }
 
-    async getJobByIdLean() {}
-
     async setNextUserOnDuty(
         jobId: string,
         dir: actionMenuOption,
     ): Promise<void> {
-        const job = await this.jobModel.findById(jobId);
+        const job: JobType = await this.jobModel.findById(jobId);
         const { users, currUserIndex } = job;
         let nextIndex: number;
         if (dir === actionMenuOption.moveUserFwd) {
@@ -161,15 +165,22 @@ export class JobService {
         );
     }
 
-    async setUserOnDuty(jobId: string, userIndex: number) {
+    async setUserOnDuty(
+        jobId: string,
+        userIndex: number,
+    ): Promise<JobDocument> {
         const updatedJob = await this.jobModel.findByIdAndUpdate(jobId, {
             currUserIndex: userIndex,
         });
         return updatedJob;
     }
 
-    async swapUsers(jobId: string, user1Id: string, user2Id: string) {
-        const job = await this.jobModel.findById(jobId);
+    async swapUsers(
+        jobId: string,
+        user1Id: string,
+        user2Id: string,
+    ): Promise<JobDocument> {
+        const job: JobDocument = await this.jobModel.findById(jobId);
         if (!job) {
             console.log("Job not found");
         }

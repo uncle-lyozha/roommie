@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import {  taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
-import { Task, TaskType } from "./schemas/task.schema";
+import { Task, TaskDocument, TaskType } from "./schemas/task.schema";
 import { Model, ObjectId } from "mongoose";
 import { Job, JobType } from "./schemas/job.schema";
 import { UserType } from "./schemas/user.schema";
@@ -13,7 +13,7 @@ export class TaskService {
         @InjectModel("Job") private readonly jobModel: Model<Job>,
     ) {}
 
-    async createTasks(chatId?: number): Promise<void> {
+    async createTasks(chatId?: number): Promise<TaskDocument> | null {
         let jobs: JobType[] = [];
         if (!chatId) {
             jobs = await this.jobModel.find().lean().populate("users");
@@ -43,14 +43,16 @@ export class TaskService {
                 snoozedTimes: 0,
                 storyStep: "monday",
             });
-            await newTask.save();
+            const result = await newTask.save();
             console.log("New task added to db.");
+            return result;
         }
     }
 
-    async createTaskForJob(job: JobType) {
+    async createTaskForJob(jobId: string): Promise<TaskDocument> {
+        const job: JobType = await this.jobModel.findById(jobId)
         const currentUser: UserType = job.users[job.currUserIndex];
-        let newTask = new this.taskModel({
+        const newTask = new this.taskModel({
             userName: currentUser.userName,
             chatId: job.chatId,
             TGId: currentUser.tgId,
@@ -61,9 +63,9 @@ export class TaskService {
             snoozedTimes: 0,
             storyStep: "monday",
         });
-        const task: TaskType = (await newTask.save()).toObject() as TaskType;
-        console.log("New task added to db: \n" + task);
-        return task;
+        const result: TaskDocument = await newTask.save();
+        console.log("New task added to db: \n" + result.jobName);
+        return result;
     }
 
     async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
