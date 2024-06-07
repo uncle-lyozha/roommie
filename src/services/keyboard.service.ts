@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Ctx, InjectBot } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
+import { JobType, LeanJobType, UserType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { SessionService } from "src/db/session.service";
 import { UserService } from "src/db/user.service";
@@ -42,7 +42,7 @@ export class KeyboardService {
         );
     }
 
-    async showJobMenuKeyboard(@Ctx() ctx: Context, job: JobType, msg: string) {
+    async showJobMenuKeyboard(@Ctx() ctx: Context, job: LeanJobType, msg: string) {
         await ctx.editMessageText(msg, {
             reply_markup: {
                 inline_keyboard: [
@@ -84,7 +84,7 @@ export class KeyboardService {
         });
     }
 
-    async showEditMenuKeyboard(@Ctx() ctx: Context, jobId: string) {
+    async showEditMenuKeyboard(@Ctx() ctx: Context) {
         await ctx.editMessageText(
             "Edit options:",
             Markup.inlineKeyboard(
@@ -177,12 +177,12 @@ export class KeyboardService {
         );
     }
 
-    async showUserList(@Ctx() ctx: Context, job: JobType) {
+    async showUserList(@Ctx() ctx: Context, job: LeanJobType) {
         let buttons = [];
-        for (const userName of job.users) {
-            const user = await this.userService.findUserByName(
-                userName.userName,
-            );
+        for (const user of job.users) {
+            // const user: UserType = await this.userService.findUserById(
+            //     user._id,
+            // );
             const btn = [
                 Markup.button.callback(user.userName, "user:" + user._id),
             ];

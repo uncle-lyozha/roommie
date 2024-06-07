@@ -9,14 +9,14 @@ import mongoose, {
     Types,
 } from "mongoose";
 import { Job } from "./schemas/job.schema";
-import { JobType, UserType } from "./db.types";
+import { JobType, LeanJobType, UserType } from "./db.types";
 import { actionMenuOption } from "utils/const";
 
 @Injectable()
 export class JobService {
     constructor(@InjectModel("Job") private readonly jobModel: Model<Job>) {}
 
-    async addNewJob(job: JobType): Promise<void> {
+    async addNewJob(job: LeanJobType): Promise<void> {
         try {
             const name = job.name;
             const chatId = job.chatId;
@@ -37,18 +37,21 @@ export class JobService {
         }
     }
 
-    async addUserToJob(
-        chatId: number,
-        jobId: Types.ObjectId,
-        userId: Types.ObjectId,
-    ): Promise<void> {
+    async addUserToJob(jobId: string, user: UserType) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { _id: jobId, chatId: chatId },
-                { $push: { users: userId } },
-                { new: true },
+            const updatedJob: LeanJobType = await this.jobModel
+                .findByIdAndUpdate(
+                    jobId,
+                    { $push: { users: user } },
+                    { new: true },
+                )
+                .lean()
+                .populate("users");
+            const userListLength = updatedJob.users.length;
+            console.log(
+                `User ${updatedJob.users[userListLength - 1].userName} added to ${updatedJob.name}.`,
             );
-            console.log(`User ${userId} added to ${jobId}.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
@@ -78,35 +81,29 @@ export class JobService {
         }
     }
 
-    async editJobName(
-        chatId: number,
-        jobName: string,
-        jobNewName: string,
-    ): Promise<void> {
+    async editJobName(jobId: string, jobNewName: string) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
+                jobId,
                 { $set: { name: jobNewName } },
                 { new: true },
             );
             console.log(`Job name updated to ${jobNewName}.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async editJobDescription(
-        chatId: number,
-        jobName: string,
-        jobNewDescr: string,
-    ): Promise<void> {
+    async editJobDescription(jobId: string, jobNewDescr: string) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
+                jobId,
                 { $set: { description: jobNewDescr } },
                 { new: true },
             );
-            console.log(`Description for ${jobName} updated.`);
+            console.log(`Description for "${updatedJob.name}" updated.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
@@ -130,15 +127,18 @@ export class JobService {
         return job;
     }
 
-    async getJobById(jobId: string): Promise<JobType> {
-        const job: JobType = await this.jobModel
+    async getJobById(jobId: string): Promise<LeanJobType> {
+        const job: LeanJobType = await this.jobModel
             .findById(jobId)
+            .lean()
             .populate("users");
         return job;
     }
 
+    async getJobByIdLean() {}
+
     async setNextUserOnDuty(
-        jobId: string,
+        jobId: ObjectId,
         dir: actionMenuOption,
     ): Promise<void> {
         const job = await this.jobModel.findById(jobId);
@@ -169,7 +169,6 @@ export class JobService {
         if (!job) {
             console.log("Job not found");
         }
-
         const users: any = job.users;
         const index1 = users.findIndex(
             (userId) => userId._id.toString() === user1Id,

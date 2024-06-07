@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { JobType, TaskType, UserType } from "./db.types";
+import { JobType, LeanJobType, LeanUserType, TaskType, UserType } from "./db.types";
 import { moveEnum, taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
 import { Task } from "./schemas/task.schema";
@@ -15,11 +15,11 @@ export class TaskService {
     ) {}
 
     async createTasks(chatId?: number): Promise<void> {
-        let jobs: JobType[] = [];
+        let jobs: LeanJobType[] = [];
         if (!chatId) {
-            jobs = await this.jobModel.find();
+            jobs = await this.jobModel.find().lean().populate("users");
         } else {
-            jobs = await this.jobModel.find({ chatId: chatId });
+            jobs = await this.jobModel.find({ chatId: chatId }).lean().populate("users");
         }
         if (jobs.length === 0) {
             console.log("No items in Jobs collection");
@@ -27,7 +27,7 @@ export class TaskService {
         }
         for (const job of jobs) {
             let userInChargeIndex = job.currUserIndex;
-            let user: UserType = job.users[userInChargeIndex];
+            let user: LeanUserType = job.users[userInChargeIndex];
             let chatId = job.chatId;
             let TGId = user.tgId;
             let jobName = job.name;
@@ -49,8 +49,8 @@ export class TaskService {
         }
     }
 
-    async createTaskForJob(job: JobType) {
-        const currentUser = job.users[job.currUserIndex];
+    async createTaskForJob(job: LeanJobType) {
+        const currentUser: LeanUserType = job.users[job.currUserIndex];
         let newTask = new this.taskModel({
             userName: currentUser.userName,
             chatId: job.chatId,
@@ -168,14 +168,14 @@ export class TaskService {
         });
     }
 
-    async deleteAllTasksForJob(jobName: string) {
+    async deleteAllTasksForJob(jobId: string) {
         await this.taskModel.deleteMany({
-            jobName: jobName,
+            _id: jobId,
             status: {
                 $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
             },
         });
-        console.log(`All pending tasks for ${jobName}`)
+        console.log(`All pending tasks for ${jobId} deleted.`)
     }
 
     async deleteTaskById(taskId: string) {

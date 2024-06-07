@@ -42,6 +42,6 @@ export class AdminMenuWizard {
         for (const task of tasks) {
             await this.mailman.sendMonPM(task);
         }
-        await ctx.editMessageText("Private messages with tasks has been sent.");
+        await ctx.editMessageText("Private messages with tasks has been sent to users on duty.");
     }
 }

@@ -6,12 +6,13 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
+import { JobType, LeanJobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Context } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
+import { CallbackQuery } from "telegraf/typings/core/types/typegram";
 import { actionMenuOption } from "utils/const";
 
 @Wizard("menu")
@@ -23,14 +24,16 @@ export class MenuWizard {
         private readonly userService: UserService,
     ) {}
 
-    private job: JobType = {
-        _id: "",
-        name: "",
-        chatId: 0,
-        users: [],
-        description: "",
-        currUserIndex: 0,
-    };
+    private job: LeanJobType
+    // private job: JobType
+    // private job: JobType = {
+    //     _id: "",
+    //     name: "",
+    //     chatId: 0,
+    //     users: [],
+    //     description: "",
+    //     currUserIndex: 0,
+    // };
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
@@ -47,9 +50,9 @@ export class MenuWizard {
 
     @Action(/job/)
     async onSelectJob(@Ctx() ctx: WizardContext) {
-        const cbQuery = ctx.callbackQuery;
-        const data = "data" in cbQuery ? cbQuery.data : null;
-        const jobId = data.split(":")[1];
+        const cbQuery: CallbackQuery = ctx.callbackQuery;
+        const data: string = "data" in cbQuery ? cbQuery.data : null;
+        const jobId: string = data.split(":")[1];
         this.job = await this.jobService.getJobById(jobId);
         const currUserName = this.job.users[this.job.currUserIndex].userName;
         const userNameArray = this.job.users.map((user) => user.userName);
@@ -67,7 +70,7 @@ export class MenuWizard {
     async onEditJob(@Ctx() ctx: WizardContext, @Sender("id") userId: number) {
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
-            await this.keyboard.showEditMenuKeyboard(ctx, this.job._id);
+            await this.keyboard.showEditMenuKeyboard(ctx);
             ctx.wizard.next();
         } else {
             const msg = "You are not authorised to do it.";
@@ -94,14 +97,14 @@ export class MenuWizard {
 
     @Action(actionMenuOption.exit)
     async onExit(@Ctx() ctx: SceneContext) {
-        this.job = {
-            _id: "",
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
+        // this.job = {
+        //     _id: "",
+        //     name: "",
+        //     chatId: 0,
+        //     users: [],
+        //     description: "",
+        //     currUserIndex: 0,
+        // };
         await ctx.deleteMessage(ctx.callbackQuery.message.message_id);
         await ctx.scene.leave();
     }
@@ -112,14 +115,14 @@ export class MenuWizard {
             this.job._id,
             actionMenuOption.moveUserFwd,
         );
-        this.job = {
-            _id: "",
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
+        // this.job = {
+        //     _id: "",
+        //     name: "",
+        //     chatId: 0,
+        //     users: [],
+        //     description: "",
+        //     currUserIndex: 0,
+        // };
         const msg = "Done.";
         await this.keyboard.hideKeyboard(ctx);
         await ctx.editMessageText(msg);

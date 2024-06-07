@@ -6,7 +6,7 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType, UserType } from "src/db/db.types";
+import { JobType, LeanJobType, UserType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { Telegraf } from "telegraf";
@@ -22,18 +22,19 @@ export class addNewJob {
     ) {}
 
 
-    private job = {
-        _id: "",
-        name: "",
-        chatId: 0,
-        users: [],
-        description: "",
-        currUserIndex: 0,
-    };
+    private job: LeanJobType
+    // private job: JobType = {
+    //     _id: "",
+    //     name: "",
+    //     chatId: 0,
+    //     users: [],
+    //     description: "",
+    //     currUserIndex: 0,
+    // };
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext, @Sender("id") id: number) {
-        this.job.chatId = ctx.chat.id; // ERROR [ExceptionsHandler] Cannot set properties of null (setting 'chatId') - when trying to add second job right after the first was added
+        this.job.chatId = ctx.chat.id;
         const pmMsg =
             "Please enter a unique job name (Guidline: use a verb-noun construction, e.x. 'Clean the Kitchen', 'Pay the bills'). You can edit it later.";
         await ctx.editMessageText(pmMsg);
@@ -67,15 +68,15 @@ export class addNewJob {
         if (invalidUsers.length > 0) {
             const invalidUsersString = invalidUsers.join(", ");
             const pmMsg = `Users: ${invalidUsersString} are not found. Please add the usernames to the list of chat users (user must use /start command) and try to create a job again.`;
-            // this.job = this.ø
-            this.job = {
-                _id: "",
-                name: "",
-                chatId: 0,
-                users: [],
-                description: "",
-                currUserIndex: 0,
-            };
+            
+            // this.job = {
+            //     _id: "",
+            //     name: "",
+            //     chatId: 0,
+            //     users: [],
+            //     description: "",
+            //     currUserIndex: 0,
+            // };
             await ctx.scene.leave();
             await ctx.reply(pmMsg);
         } else {
@@ -92,15 +93,15 @@ export class addNewJob {
         await this.jobService.addNewJob(this.job);
         const pmMsg = `New Job "${this.job.name}" added.`;
         await ctx.reply(pmMsg);
-        // this.job = this.ø
-        this.job = {
-            _id: "",
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
+        
+        // this.job = {
+        //     _id: "",
+        //     name: "",
+        //     chatId: 0,
+        //     users: [],
+        //     description: "",
+        //     currUserIndex: 0,
+        // };
         await ctx.scene.leave();
     }
 }

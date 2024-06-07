@@ -8,6 +8,22 @@ export type TaskType = TaskDocument & { _id: ObjectId };
 export type UserType = UserDocument & { _id: ObjectId };
 export type JobType = JobDocument & { _id: ObjectId };
 
+export type LeanUserType = {
+    _id: ObjectId;
+    userName: string;
+    tgId: number;
+    rating: number;
+};
+
+export type LeanJobType = {
+    _id: ObjectId;
+    name: string;
+    chatId: number;
+    users: LeanUserType[];
+    description: string;
+    currUserIndex: number;
+};
+
 // {
 //     _id: ObjectId;
 //     userName: string;
