@@ -1,21 +1,29 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, ObjectId, Schema } from "mongoose";
-import { Job } from "./schemas/job.schema";
-import { JobType, UserType } from "./db.types";
+import mongoose, {
+    Model,
+    Mongoose,
+    ObjectId,
+    Schema,
+    SchemaTypes,
+    Types,
+} from "mongoose";
+import { Job, JobType } from "./schemas/job.schema";
 import { actionMenuOption } from "utils/const";
+import { UserType } from "./schemas/user.schema";
+import { TJobDto } from "utils/utils.types";
 
 @Injectable()
 export class JobService {
     constructor(@InjectModel("Job") private readonly jobModel: Model<Job>) {}
 
-    async addNewJob(job: JobType): Promise<void> {
+    async addNewJob(job: TJobDto) {
         try {
             const name = job.name;
             const chatId = job.chatId;
             const users = job.users;
             const description = job.description;
-            const currUserIndex = job.currUserIndex || 0;
+            const currUserIndex = 0;
             const newJob = new this.jobModel({
                 name,
                 chatId,
@@ -25,36 +33,44 @@ export class JobService {
             });
             const result = await newJob.save();
             console.log(`New job created:\n${result}.`);
+            return result;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async addUserToJob(
-        chatId: number,
-        jobName: string,
-        userName: string,
-    ): Promise<void> {
+    async addUserToJob(jobId: string, user: UserType) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
-                { $push: { users: userName } },
-                { new: true },
+            const updatedJob: JobType = await this.jobModel
+                .findByIdAndUpdate(
+                    jobId,
+                    { $push: { users: user } },
+                    { new: true },
+                )
+                .lean()
+                .populate("users");
+            const userListLength = updatedJob.users.length;
+            console.log(
+                `User ${updatedJob.users[userListLength - 1].userName} added to ${updatedJob.name}.`,
             );
-            console.log(`User ${userName} added to ${jobName}.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async deleteUserFromJob(jobId: string, userId: string): Promise<void> {
+    async deleteUserFromJob(jobId: string, userId: Types.ObjectId) {
         try {
-            await this.jobModel.findByIdAndUpdate(
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
                 jobId,
-                { $pull: { users: { _id: userId } } },
+                {
+                    $pull: { users: { _id: userId } },
+                    $set: { currUserIndex: 0 },
+                },
                 { new: true },
             );
             console.log(`User ${userId} removed from job ${jobId}.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
@@ -69,35 +85,29 @@ export class JobService {
         }
     }
 
-    async editJobName(
-        chatId: number,
-        jobName: string,
-        jobNewName: string,
-    ): Promise<void> {
+    async editJobName(jobId: string, jobNewName: string) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
+                jobId,
                 { $set: { name: jobNewName } },
                 { new: true },
             );
             console.log(`Job name updated to ${jobNewName}.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
     }
 
-    async editJobDescription(
-        chatId: number,
-        jobName: string,
-        jobNewDescr: string,
-    ): Promise<void> {
+    async editJobDescription(jobId: string, jobNewDescr: string) {
         try {
-            await this.jobModel.findOneAndUpdate(
-                { name: jobName, chatId: chatId },
+            const updatedJob = await this.jobModel.findByIdAndUpdate(
+                jobId,
                 { $set: { description: jobNewDescr } },
                 { new: true },
             );
-            console.log(`Description for ${jobName} updated.`);
+            console.log(`Description for "${updatedJob.name}" updated.`);
+            return updatedJob;
         } catch (err) {
             console.error(err);
         }
@@ -124,9 +134,12 @@ export class JobService {
     async getJobById(jobId: string): Promise<JobType> {
         const job: JobType = await this.jobModel
             .findById(jobId)
+            .lean()
             .populate("users");
         return job;
     }
+
+    async getJobByIdLean() {}
 
     async setNextUserOnDuty(
         jobId: string,
@@ -148,25 +161,35 @@ export class JobService {
         );
     }
 
+    async setUserOnDuty(jobId: string, userIndex: number) {
+        const updatedJob = await this.jobModel.findByIdAndUpdate(jobId, {
+            currUserIndex: userIndex,
+        });
+        return updatedJob;
+    }
+
     async swapUsers(jobId: string, user1Id: string, user2Id: string) {
-        const job = (await this.jobModel.findById(jobId));
+        const job = await this.jobModel.findById(jobId);
         if (!job) {
             console.log("Job not found");
         }
-
         const users: any = job.users;
-        const index1 = users.findIndex((userId) => userId._id.toString() === user1Id);
-        const index2 = users.findIndex((userId) => userId._id.toString() === user2Id);
-        
+        const index1 = users.findIndex(
+            (userId) => userId._id.toString() === user1Id,
+        );
+        const index2 = users.findIndex(
+            (userId) => userId._id.toString() === user2Id,
+        );
+
         if (index1 === -1 || index2 === -1) {
-            console.log ("One or both users not found in the job")
+            console.log("One or both users not found in the job");
         }
 
         const temp = users[index1];
         users[index1] = users[index2];
         users[index2] = temp;
         job.users = users;
-        
+
         await job.save();
         return job;
     }

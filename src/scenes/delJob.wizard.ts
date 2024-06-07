@@ -8,6 +8,7 @@ import {
     WizardStep,
 } from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
+import { TaskService } from "src/db/task.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
@@ -20,6 +21,7 @@ export class delJob {
         @InjectBot() private readonly bot: Telegraf<SceneContext>,
         private readonly jobService: JobService,
         private readonly keyboard: KeyboardService,
+        private readonly taskService: TaskService,
     ) {}
 
     private jobId: string;
@@ -36,7 +38,8 @@ export class delJob {
     @Action(actionMenuOption.confirm)
     async onConfirm(@Ctx() ctx: WizardContext) {
         await this.jobService.deleteJob(this.jobId);
-        const msg = "Job deleted.";
+        await this.taskService.deleteAllTasksForJob(this.jobId);
+        const msg = "Job and tasks assossiated with it has been deleted.";
         ctx.editMessageText(msg);
         await ctx.scene.leave();
     }

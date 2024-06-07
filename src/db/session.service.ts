@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Session } from "./schemas/session.schema";
+import { Session, TSession } from "./schemas/session.schema";
 import { Model } from "mongoose";
-import { MySessionType } from "./db.types";
 
 @Injectable()
 export class SessionService {
@@ -24,7 +23,7 @@ export class SessionService {
         return result._id.toString();
     }
 
-    async findSessionById(id: string): Promise<MySessionType> {
+    async findSessionById(id: string): Promise<TSession> {
         const session = await this.sessionModel.findById(id);
         return session;
     }

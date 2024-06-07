@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { JobType, TaskType, UserType } from "./db.types";
-import { moveEnum, taskStatus } from "utils/const";
+import {  taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
-import { Task } from "./schemas/task.schema";
+import { Task, TaskType } from "./schemas/task.schema";
 import { Model, ObjectId } from "mongoose";
-import { Job } from "./schemas/job.schema";
-import { UserService } from "./user.service";
+import { Job, JobType } from "./schemas/job.schema";
+import { UserType } from "./schemas/user.schema";
 
 @Injectable()
 export class TaskService {
@@ -17,9 +16,9 @@ export class TaskService {
     async createTasks(chatId?: number): Promise<void> {
         let jobs: JobType[] = [];
         if (!chatId) {
-            jobs = await this.jobModel.find();
+            jobs = await this.jobModel.find().lean().populate("users");
         } else {
-            jobs = await this.jobModel.find({ chatId: chatId });
+            jobs = await this.jobModel.find({ chatId: chatId }).lean().populate("users");
         }
         if (jobs.length === 0) {
             console.log("No items in Jobs collection");
@@ -49,14 +48,13 @@ export class TaskService {
         }
     }
 
-    async createTaskForJobName(jobName: string, userInChargeIndex: number) {
-        const job: JobType = await this.jobModel.findOne({ name: jobName });
-        const user: UserType = job.users[userInChargeIndex];
+    async createTaskForJob(job: JobType) {
+        const currentUser: UserType = job.users[job.currUserIndex];
         let newTask = new this.taskModel({
-            userName: user.userName,
+            userName: currentUser.userName,
             chatId: job.chatId,
-            TGId: user.tgId,
-            jobName: jobName,
+            TGId: currentUser.tgId,
+            jobName: job.name,
             description: job.description,
             status: taskStatus.new,
             date: new Date().toISOString(),
@@ -68,7 +66,7 @@ export class TaskService {
         return task;
     }
 
-    async setTaskStatus(taskId: ObjectId, status: taskStatus): Promise<void> {
+    async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
         try {
             if (status === taskStatus.new) {
                 return;
@@ -112,9 +110,7 @@ export class TaskService {
         }
     }
 
-    async setNextDuty(taskId: string, dir: moveEnum) {}
-
-    async getTaskById(id: ObjectId): Promise<TaskType> {
+    async getTaskById(id: string): Promise<TaskType> {
         const task: TaskType | null = await this.taskModel.findById(id);
         if (task) {
             return task;
@@ -171,7 +167,18 @@ export class TaskService {
         });
     }
 
-    async deleteTaskByJobName(jobName: string) {
-        await this.taskModel.findOneAndDelete({ jobName: jobName });
+    async deleteAllTasksForJob(jobId: string) {
+        await this.taskModel.deleteMany({
+            _id: jobId,
+            status: {
+                $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
+            },
+        });
+        console.log(`All pending tasks for ${jobId} deleted.`)
+    }
+
+    async deleteTaskById(taskId: string) {
+        await this.taskModel.findByIdAndDelete(taskId);
+        console.log(`TaskId ${taskId} deleted.`);
     }
 }

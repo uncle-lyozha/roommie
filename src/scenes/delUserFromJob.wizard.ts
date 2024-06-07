@@ -1,16 +1,12 @@
+import { Types } from "mongoose";
 import {
     Action,
     Ctx,
     InjectBot,
-    On,
-    Sender,
-    Update,
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
-import { UserService } from "src/db/user.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
@@ -24,17 +20,15 @@ export class delUserFromJob {
         private readonly keyboard: KeyboardService,
     ) {}
 
-    // private job: JobType; // fix types
-    private job;
+    private jobId: string;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
-        const jobId = sceneState.jobId;
+        this.jobId = sceneState.jobId;
         const msg = "Choose a user to delete from job";
         await ctx.editMessageText(msg);
-        this.job = await this.jobService.getJobById(jobId);
-        await this.keyboard.showUserList(ctx, this.job);
+        await this.keyboard.showUserList(ctx, this.jobId);
         ctx.wizard.next();
     }
     
@@ -42,19 +36,14 @@ export class delUserFromJob {
     async onUserList(@Ctx() ctx: WizardContext) {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
-        const userId = data.split(":")[1];
-        await this.jobService.deleteUserFromJob(this.job._id.toString(), userId);
-        const pmMsg = `User ${userId} deleted from job "${this.job.name}".`;
+        const userIdString = data.split(":")[1];
+        const userId = new Types.ObjectId(userIdString);
+        const updatedJob = await this.jobService.deleteUserFromJob(
+            this.jobId,
+            userId,
+        );
+        const pmMsg = `User deleted from job "${updatedJob.name}".`;
         await ctx.editMessageText(pmMsg);
-        await this.job.save();
-        this.job = {
-            _id: "",
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
         await ctx.scene.leave();
     }
 }

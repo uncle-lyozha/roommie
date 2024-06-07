@@ -3,7 +3,7 @@
         "message": [
             {
                 "type": "text",
-                "text": "Congratulations! This week you are on duty to "
+                "text": "Congratulations! This week you are on duty: "
             },
             {
                 "type": "image",

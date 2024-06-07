@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectBot } from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
+import { JobType } from "src/db/schemas/job.schema";
 import { TaskService } from "src/db/task.service";
 import { UserService } from "src/db/user.service";
 import { MailmanService } from "src/mailman/mailman.service";
@@ -31,16 +32,17 @@ export class SchedulersService {
         if (pendingTasks) {
             for (const task of pendingTasks) {
                 await this.taskService.setTaskStatus(
-                    task._id,
+                    task._id.toString(),
                     taskStatus.failed,
                 );
             }
         }
-        const jobs = await this.jobService.getAllJobs();
+        const jobs: JobType[] = await this.jobService.getAllJobs();
         if (jobs) {
             for (const job of jobs) {
+                const jobIdStr = job._id.toString()
                 await this.jobService.setNextUserOnDuty(
-                    job._id,
+                    jobIdStr,
                     actionMenuOption.moveUserFwd,
                 );
                 console.log(`Shift moved ffw for ${job.name}`);

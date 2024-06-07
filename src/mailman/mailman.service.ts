@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectBot } from "nestjs-telegraf";
-import { TaskType } from "src/db/db.types";
+import { TaskType } from "src/db/schemas/task.schema";
 import { SessionService } from "src/db/session.service";
 import { Markup, Telegraf } from "telegraf";
 import { SceneContext } from "telegraf/scenes";
