@@ -1,3 +1,4 @@
+import { UserType } from "src/db/schemas/user.schema";
 import { actionMenuOption } from "./const";
 
 export type ScriptType = {
@@ -21,12 +22,12 @@ export type RepliesType = {
     };
 };
 
-export type CbDataType = {
-    type: string;
-    jobId?: string;
-    taskId?: string;
-    option?: actionMenuOption;
-};
+// export type CbDataType = {
+//     type: string;
+//     jobId?: string;
+//     taskId?: string;
+//     option?: actionMenuOption;
+// };
 
 export type customStateType = {
     jobId: string;
@@ -38,4 +39,11 @@ export type newChatMemberType = {
     first_name: string;
     username: string;
     language_code: string;
+};
+
+export type TJobDto = {
+    name: string;
+    chatId: number;
+    users: UserType[];
+    description: string;
 };

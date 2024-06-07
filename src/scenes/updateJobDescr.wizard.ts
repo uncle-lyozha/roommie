@@ -1,5 +1,4 @@
 import { Ctx, InjectBot, On, Wizard, WizardStep } from "nestjs-telegraf";
-import { JobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";

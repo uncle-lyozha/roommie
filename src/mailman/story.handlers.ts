@@ -1,7 +1,7 @@
 import { ObjectId, SchemaTypes, Types } from "mongoose";
 import { Ctx, InjectBot, On, Update } from "nestjs-telegraf";
-import { MySessionType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
+import { TSession } from "src/db/schemas/session.schema";
 import { SessionService } from "src/db/session.service";
 import { TaskService } from "src/db/task.service";
 import { KeyboardService } from "src/services/keyboard.service";
@@ -22,11 +22,10 @@ export class StoryCbQueryHandler {
     async onStoryCbQuery(@Ctx() ctx: Context) {
         const cbQuery = ctx.callbackQuery;
         const payloadId = "data" in cbQuery ? cbQuery.data : null;
-        const payload: MySessionType =
+        const payload: TSession =
             await this.sessionService.findSessionById(payloadId);
-        const id = new SchemaTypes.ObjectId(payload.id)
         if (payload.type === "story") {
-            await this.handleStorySteps(ctx, id, payload.option);
+            await this.handleStorySteps(ctx, payload.id, payload.option);
         } else {
             return null;
         }
@@ -34,7 +33,7 @@ export class StoryCbQueryHandler {
 
     private async handleStorySteps(
         ctx: Context,
-        taskId: ObjectId,
+        taskId: string,
         nextStep: string,
     ) {
         if (nextStep === taskStatus.pending) {

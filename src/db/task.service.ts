@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { JobType, LeanJobType, LeanUserType, TaskType, UserType } from "./db.types";
-import { moveEnum, taskStatus } from "utils/const";
+import {  taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
-import { Task } from "./schemas/task.schema";
+import { Task, TaskType } from "./schemas/task.schema";
 import { Model, ObjectId } from "mongoose";
-import { Job } from "./schemas/job.schema";
-import { UserService } from "./user.service";
+import { Job, JobType } from "./schemas/job.schema";
+import { UserType } from "./schemas/user.schema";
 
 @Injectable()
 export class TaskService {
@@ -15,7 +14,7 @@ export class TaskService {
     ) {}
 
     async createTasks(chatId?: number): Promise<void> {
-        let jobs: LeanJobType[] = [];
+        let jobs: JobType[] = [];
         if (!chatId) {
             jobs = await this.jobModel.find().lean().populate("users");
         } else {
@@ -27,7 +26,7 @@ export class TaskService {
         }
         for (const job of jobs) {
             let userInChargeIndex = job.currUserIndex;
-            let user: LeanUserType = job.users[userInChargeIndex];
+            let user: UserType = job.users[userInChargeIndex];
             let chatId = job.chatId;
             let TGId = user.tgId;
             let jobName = job.name;
@@ -49,8 +48,8 @@ export class TaskService {
         }
     }
 
-    async createTaskForJob(job: LeanJobType) {
-        const currentUser: LeanUserType = job.users[job.currUserIndex];
+    async createTaskForJob(job: JobType) {
+        const currentUser: UserType = job.users[job.currUserIndex];
         let newTask = new this.taskModel({
             userName: currentUser.userName,
             chatId: job.chatId,
@@ -67,7 +66,7 @@ export class TaskService {
         return task;
     }
 
-    async setTaskStatus(taskId: ObjectId, status: taskStatus): Promise<void> {
+    async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
         try {
             if (status === taskStatus.new) {
                 return;
@@ -111,7 +110,7 @@ export class TaskService {
         }
     }
 
-    async getTaskById(id: ObjectId): Promise<TaskType> {
+    async getTaskById(id: string): Promise<TaskType> {
         const task: TaskType | null = await this.taskModel.findById(id);
         if (task) {
             return task;

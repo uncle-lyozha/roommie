@@ -6,7 +6,6 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType, LeanJobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
 import { UserService } from "src/db/user.service";
 import { KeyboardService } from "src/services/keyboard.service";
@@ -24,16 +23,7 @@ export class MenuWizard {
         private readonly userService: UserService,
     ) {}
 
-    private job: LeanJobType
-    // private job: JobType
-    // private job: JobType = {
-    //     _id: "",
-    //     name: "",
-    //     chatId: 0,
-    //     users: [],
-    //     description: "",
-    //     currUserIndex: 0,
-    // };
+    private jobId: string;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
@@ -43,7 +33,6 @@ export class MenuWizard {
 
     @Action(actionMenuOption.addJob)
     async onAddJob(@Ctx() ctx: WizardContext) {
-        // this.job = null;
         await ctx.scene.leave();
         ctx.scene.enter("addnewjob");
     }
@@ -52,17 +41,24 @@ export class MenuWizard {
     async onSelectJob(@Ctx() ctx: WizardContext) {
         const cbQuery: CallbackQuery = ctx.callbackQuery;
         const data: string = "data" in cbQuery ? cbQuery.data : null;
-        const jobId: string = data.split(":")[1];
-        this.job = await this.jobService.getJobById(jobId);
-        const currUserName = this.job.users[this.job.currUserIndex].userName;
-        const userNameArray = this.job.users.map((user) => user.userName);
+        this.jobId = data.split(":")[1];
+        const job = await this.jobService.getJobById(this.jobId);
+        let currUserName: string = "";
+        let userNameArray: string[] | string;
+        if (job.users.length === 0) {
+            currUserName = "Nobody";
+            userNameArray = "No users in the list.";
+        } else {
+            currUserName = job.users[job.currUserIndex].userName;
+            userNameArray = job.users.map((user) => user.userName);
+        }
         const msg = `
-            **${this.job.name}**
+            **${job.name}**
             Line up: ${userNameArray};
             This week on duty: ${currUserName};
-            Job's description: \n${this.job.description}
+            Job's description: \n${job.description}
             `;
-        await this.keyboard.showJobMenuKeyboard(ctx, this.job, msg);
+        await this.keyboard.showJobMenuKeyboard(ctx, msg);
         ctx.wizard.next();
     }
 
@@ -97,14 +93,6 @@ export class MenuWizard {
 
     @Action(actionMenuOption.exit)
     async onExit(@Ctx() ctx: SceneContext) {
-        // this.job = {
-        //     _id: "",
-        //     name: "",
-        //     chatId: 0,
-        //     users: [],
-        //     description: "",
-        //     currUserIndex: 0,
-        // };
         await ctx.deleteMessage(ctx.callbackQuery.message.message_id);
         await ctx.scene.leave();
     }
@@ -112,17 +100,9 @@ export class MenuWizard {
     @Action(actionMenuOption.moveUserFwd)
     async onNextShift(@Ctx() ctx: WizardContext) {
         await this.jobService.setNextUserOnDuty(
-            this.job._id,
+            this.jobId,
             actionMenuOption.moveUserFwd,
         );
-        // this.job = {
-        //     _id: "",
-        //     name: "",
-        //     chatId: 0,
-        //     users: [],
-        //     description: "",
-        //     currUserIndex: 0,
-        // };
         const msg = "Done.";
         await this.keyboard.hideKeyboard(ctx);
         await ctx.editMessageText(msg);
@@ -132,7 +112,7 @@ export class MenuWizard {
     @Action(actionMenuOption.moveUserBck)
     async onPrevShift(@Ctx() ctx: WizardContext) {
         await this.jobService.setNextUserOnDuty(
-            this.job._id,
+            this.jobId,
             actionMenuOption.moveUserFwd,
         );
         const msg = "Done.";
@@ -143,56 +123,56 @@ export class MenuWizard {
 
     @Action(actionMenuOption.assignUser)
     async onAssignUser(@Ctx() ctx: SceneContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("assignuser", { jobId });
     }
 
     @Action(actionMenuOption.swap)
     async onSwap(@Ctx() ctx: SceneContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("swapusers", { jobId });
     }
 
     @Action(actionMenuOption.addUser)
     async onAddUser(@Ctx() ctx: SceneContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("addusertojob", { jobId });
     }
 
     @Action(actionMenuOption.delUser)
     async onDelUser(@Ctx() ctx: WizardContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("deluser", { jobId });
     }
 
     @Action(actionMenuOption.renameJob)
     async onRename(@Ctx() ctx: WizardContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("editJobName", { jobId });
     }
 
     @Action(actionMenuOption.editDescr)
     async onEditDescription(@Ctx() ctx: WizardContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("updateDescr", { jobId });
     }
 
     @Action(actionMenuOption.adminMenu)
     async onAdminMenu(@Ctx() ctx: WizardContext) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         await ctx.scene.leave();
         await ctx.scene.enter("adminMenu", { jobId });
     }
 
     @Action(actionMenuOption.deleteJob)
     async onDelJob(@Ctx() ctx: WizardContext, @Sender("id") userId: number) {
-        const jobId = this.job._id;
+        const jobId = this.jobId;
         const chatId = ctx.chat.id;
         if (await this.isAdmin(chatId, userId, ctx)) {
             await ctx.scene.leave();

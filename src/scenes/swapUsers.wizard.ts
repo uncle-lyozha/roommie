@@ -13,32 +13,27 @@ export class SwapUsersWizard {
 
     private user1Id: string;
     private user2Id: string;
-    private job;
+    private jobId: string;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
         const sceneState = ctx.wizard.state as customStateType;
-        const jobId = sceneState.jobId;
+        this.jobId = sceneState.jobId;
         const msg =
             "You are about to change the line-up for this job. Choose the first user you want to swap shifts with.";
         await ctx.editMessageText(msg);
-        this.job = await this.jobService.getJobById(jobId.toString());
+        const job = await this.jobService.getJobById(this.jobId);
 
-        if (this.job.users.length < 2) {
-            this.job = {
-                _id: "",
-                name: "",
-                chatId: 0,
-                users: [],
-                description: "",
-                currUserIndex: 0,
-            };
+        if (job.users.length < 2) {
             const msg = "There's only one user to this job, nothing to swap.";
             await ctx.editMessageText(msg);
+            this.jobId = "";
+            this.user1Id = "";
+            this.user2Id = "";
             await ctx.scene.leave();
         }
 
-        await this.keyboard.showUserList(ctx, this.job);
+        await this.keyboard.showUserList(ctx, this.jobId);
         ctx.wizard.next();
     }
 
@@ -50,7 +45,7 @@ export class SwapUsersWizard {
         this.user1Id = data.split(":")[1];
         const msg = "Choose the second user you want to swap.";
         await ctx.editMessageText(msg);
-        await this.keyboard.showUserList(ctx, this.job);
+        await this.keyboard.showUserList(ctx, this.jobId);
         ctx.wizard.next();
     }
 
@@ -61,26 +56,20 @@ export class SwapUsersWizard {
         const data = "data" in cbQuery ? cbQuery.data : null;
         this.user2Id = data.split(":")[1];
         const updatedJob = await this.jobService.swapUsers(
-            this.job._id,
+            this.jobId,
             this.user1Id,
             this.user2Id,
         );
         if (updatedJob) {
             const msg = "Users has been swaped.";
-            this.job.save();
             await ctx.editMessageText(msg);
         } else {
             const errMsgGeneral = "Error while processing. Try again later.";
             await ctx.editMessageText(errMsgGeneral);
         }
-        this.job = {
-            _id: "",
-            name: "",
-            chatId: 0,
-            users: [],
-            description: "",
-            currUserIndex: 0,
-        };
+        this.jobId = "";
+        this.user1Id = "";
+        this.user2Id = "";
         await ctx.scene.leave();
     }
 }

@@ -1,6 +1,6 @@
 import { Action, Ctx, InjectBot, Wizard, WizardStep } from "nestjs-telegraf";
-import { LeanJobType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
+import { JobType } from "src/db/schemas/job.schema";
 import { TaskService } from "src/db/task.service";
 import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
@@ -18,7 +18,7 @@ export class AssignUserWizard {
         private readonly mailman: MailmanService,
     ) {}
 
-    private job: LeanJobType;
+    private job: JobType;
 
     @WizardStep(1)
     async onEnter(@Ctx() ctx: WizardContext) {
@@ -28,7 +28,7 @@ export class AssignUserWizard {
         "Choose a user you want to assign to be on duty for the job this week.";
         await ctx.editMessageText(msg);
         this.job = await this.jobService.getJobById(jobId);
-        await this.keyboard.showUserList(ctx, this.job);
+        await this.keyboard.showUserList(ctx, jobId);
         ctx.wizard.next();
     }
     
@@ -54,14 +54,6 @@ export class AssignUserWizard {
         }
         const pmMsg = `New task "${newTask.jobName}" created for ${newTask.userName}`;
         await ctx.editMessageText(pmMsg);
-        // this.job = {
-        //     _id: "",
-        //     name: "",
-        //     chatId: 0,
-        //     users: [],
-        //     description: "",
-        //     currUserIndex: 0,
-        // };
         await ctx.scene.leave();
     }
 }

@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import {
     Ctx,
     InjectBot,
@@ -6,10 +5,9 @@ import {
     Wizard,
     WizardStep,
 } from "nestjs-telegraf";
-import { JobType, LeanJobType, UserType } from "src/db/db.types";
 import { JobService } from "src/db/job.service";
+import { UserType } from "src/db/schemas/user.schema";
 import { UserService } from "src/db/user.service";
-import { Telegraf } from "telegraf";
 import { SceneContext, WizardContext } from "telegraf/scenes";
 import { customStateType } from "utils/utils.types";
 

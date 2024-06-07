@@ -8,21 +8,22 @@ import mongoose, {
     SchemaTypes,
     Types,
 } from "mongoose";
-import { Job } from "./schemas/job.schema";
-import { JobType, LeanJobType, UserType } from "./db.types";
+import { Job, JobType } from "./schemas/job.schema";
 import { actionMenuOption } from "utils/const";
+import { UserType } from "./schemas/user.schema";
+import { TJobDto } from "utils/utils.types";
 
 @Injectable()
 export class JobService {
     constructor(@InjectModel("Job") private readonly jobModel: Model<Job>) {}
 
-    async addNewJob(job: LeanJobType): Promise<void> {
+    async addNewJob(job: TJobDto) {
         try {
             const name = job.name;
             const chatId = job.chatId;
             const users = job.users;
             const description = job.description;
-            const currUserIndex = job.currUserIndex || 0;
+            const currUserIndex = 0;
             const newJob = new this.jobModel({
                 name,
                 chatId,
@@ -32,6 +33,7 @@ export class JobService {
             });
             const result = await newJob.save();
             console.log(`New job created:\n${result}.`);
+            return result;
         } catch (err) {
             console.error(err);
         }
@@ -39,7 +41,7 @@ export class JobService {
 
     async addUserToJob(jobId: string, user: UserType) {
         try {
-            const updatedJob: LeanJobType = await this.jobModel
+            const updatedJob: JobType = await this.jobModel
                 .findByIdAndUpdate(
                     jobId,
                     { $push: { users: user } },
@@ -61,11 +63,13 @@ export class JobService {
         try {
             const updatedJob = await this.jobModel.findByIdAndUpdate(
                 jobId,
-                { $pull: { users: { _id: userId } } },
+                {
+                    $pull: { users: { _id: userId } },
+                    $set: { currUserIndex: 0 },
+                },
                 { new: true },
             );
             console.log(`User ${userId} removed from job ${jobId}.`);
-
             return updatedJob;
         } catch (err) {
             console.error(err);
@@ -127,8 +131,8 @@ export class JobService {
         return job;
     }
 
-    async getJobById(jobId: string): Promise<LeanJobType> {
-        const job: LeanJobType = await this.jobModel
+    async getJobById(jobId: string): Promise<JobType> {
+        const job: JobType = await this.jobModel
             .findById(jobId)
             .lean()
             .populate("users");
@@ -138,7 +142,7 @@ export class JobService {
     async getJobByIdLean() {}
 
     async setNextUserOnDuty(
-        jobId: ObjectId,
+        jobId: string,
         dir: actionMenuOption,
     ): Promise<void> {
         const job = await this.jobModel.findById(jobId);
