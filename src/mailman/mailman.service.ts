@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectBot } from "nestjs-telegraf";
-import { TaskType } from "src/db/schemas/task.schema";
+import { TaskDocument, TaskType } from "src/db/schemas/task.schema";
 import { SessionService } from "src/db/session.service";
 import { Markup, Telegraf } from "telegraf";
 import { SceneContext } from "telegraf/scenes";
@@ -32,7 +32,7 @@ export class MailmanService {
         });
     }
 
-    async sendMonPM(task: TaskType) {
+    async sendMonPM(task: TaskDocument) {
         const taskId = task._id.toString();
         const currentStep = task.status;
         let job = "";

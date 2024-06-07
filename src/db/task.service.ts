@@ -1,24 +1,28 @@
 import { Injectable } from "@nestjs/common";
-import {  taskStatus } from "utils/const";
+import { taskStatus } from "utils/const";
 import { InjectModel } from "@nestjs/mongoose";
-import { Task, TaskType } from "./schemas/task.schema";
-import { Model, ObjectId } from "mongoose";
+import { Task, TaskDocument, TaskType } from "./schemas/task.schema";
+import { Model } from "mongoose";
 import { Job, JobType } from "./schemas/job.schema";
 import { UserType } from "./schemas/user.schema";
+import { ITask } from "./task.interface";
 
 @Injectable()
-export class TaskService {
+export class TaskService implements ITask {
     constructor(
         @InjectModel("Task") private readonly taskModel: Model<Task>,
         @InjectModel("Job") private readonly jobModel: Model<Job>,
     ) {}
 
-    async createTasks(chatId?: number): Promise<void> {
+    async createTasks(chatId?: number): Promise<TaskDocument> | null {
         let jobs: JobType[] = [];
         if (!chatId) {
             jobs = await this.jobModel.find().lean().populate("users");
         } else {
-            jobs = await this.jobModel.find({ chatId: chatId }).lean().populate("users");
+            jobs = await this.jobModel
+                .find({ chatId: chatId })
+                .lean()
+                .populate("users");
         }
         if (jobs.length === 0) {
             console.log("No items in Jobs collection");
@@ -43,14 +47,16 @@ export class TaskService {
                 snoozedTimes: 0,
                 storyStep: "monday",
             });
-            await newTask.save();
+            const result = await newTask.save();
             console.log("New task added to db.");
+            return result;
         }
     }
 
-    async createTaskForJob(job: JobType) {
+    async createTaskForJob(jobId: string): Promise<TaskDocument> {
+        const job: JobType = await this.jobModel.findById(jobId);
         const currentUser: UserType = job.users[job.currUserIndex];
-        let newTask = new this.taskModel({
+        const newTask = new this.taskModel({
             userName: currentUser.userName,
             chatId: job.chatId,
             TGId: currentUser.tgId,
@@ -61,15 +67,19 @@ export class TaskService {
             snoozedTimes: 0,
             storyStep: "monday",
         });
-        const task: TaskType = (await newTask.save()).toObject() as TaskType;
-        console.log("New task added to db: \n" + task);
-        return task;
+        const result: TaskDocument = await newTask.save();
+        console.log("New task added to db: \n" + result.jobName);
+        return result;
     }
 
-    async setTaskStatus(taskId: string, status: taskStatus): Promise<void> {
+    async setTaskStatus(
+        taskId: string,
+        status: taskStatus,
+    ): Promise<void> | null {
         try {
+            let result: TaskDocument;
             if (status === taskStatus.new) {
-                return;
+                return null;
             }
             if (status === taskStatus.failed) {
                 await this.taskModel.updateMany(
@@ -152,33 +162,39 @@ export class TaskService {
         return tasks;
     }
 
-    async getTaskStoryStep(taskId: string) {
+    async getTaskStoryStep(taskId: string): Promise<string> {
         const task: TaskType | null = await this.taskModel.findById(taskId);
         if (task) {
             return task.storyStep;
         } else {
-            throw new Error(`Task ${taskId} not found in DB.`);
+            console.error(`Task ${taskId} not found in DB.`);
         }
     }
 
-    async setTaskStoryStep(taskId: string, step: string) {
-        await this.taskModel.findByIdAndUpdate(taskId, {
+    async setTaskStoryStep(
+        taskId: string,
+        step: string,
+    ): Promise<TaskDocument> {
+        const result = await this.taskModel.findByIdAndUpdate(taskId, {
             storyStep: step,
         });
+        return result;
     }
 
-    async deleteAllTasksForJob(jobId: string) {
+    async deleteAllTasksForJob(jobId: string): Promise<void> {
         await this.taskModel.deleteMany({
             _id: jobId,
             status: {
                 $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
             },
         });
-        console.log(`All pending tasks for ${jobId} deleted.`)
+        console.log(`All pending tasks for ${jobId} deleted.`);
     }
 
-    async deleteTaskById(taskId: string) {
-        await this.taskModel.findByIdAndDelete(taskId);
+    async deleteTaskById(taskId: string): Promise<TaskDocument> {
+        const result: TaskDocument =
+            await this.taskModel.findByIdAndDelete(taskId);
         console.log(`TaskId ${taskId} deleted.`);
+        return result;
     }
 }

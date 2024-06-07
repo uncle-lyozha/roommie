@@ -1,5 +1,8 @@
 import { Action, Ctx, Wizard, WizardStep } from "nestjs-telegraf";
 import { JobService } from "src/db/job.service";
+import { JobDocument } from "src/db/schemas/job.schema";
+import { TaskService } from "src/db/task.service";
+import { MailmanService } from "src/mailman/mailman.service";
 import { KeyboardService } from "src/services/keyboard.service";
 import { WizardContext } from "telegraf/scenes";
 import { customStateType } from "utils/utils.types";
@@ -9,6 +12,8 @@ export class SwapUsersWizard {
     constructor(
         private readonly keyboard: KeyboardService,
         private readonly jobService: JobService,
+        private readonly taskService: TaskService,
+        private readonly mailman: MailmanService
     ) {}
 
     private user1Id: string;
@@ -55,13 +60,21 @@ export class SwapUsersWizard {
         const cbQuery = ctx.callbackQuery;
         const data = "data" in cbQuery ? cbQuery.data : null;
         this.user2Id = data.split(":")[1];
-        const updatedJob = await this.jobService.swapUsers(
+        const updatedJob: JobDocument = await this.jobService.swapUsers(
             this.jobId,
             this.user1Id,
             this.user2Id,
         );
+        await this.taskService.deleteAllTasksForJob(this.jobId);
+        const newTask = await this.taskService.createTaskForJob(this.jobId);
+        if (newTask) {
+            await this.mailman.sendMonPM(newTask);
+        } else {
+            const errMsgGeneral = "Error while processing. Try again later.";
+            await ctx.editMessageText(errMsgGeneral);
+        }
         if (updatedJob) {
-            const msg = "Users has been swaped.";
+            const msg = "A new user on duty has been assigned for job: " + updatedJob.name;
             await ctx.editMessageText(msg);
         } else {
             const errMsgGeneral = "Error while processing. Try again later.";
