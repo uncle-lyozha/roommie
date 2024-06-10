@@ -127,6 +127,11 @@ export class Commands {
         }
     }
 
+    @Command("sticker")
+    async sticker(@Ctx() ctx: Context) {
+        await ctx.sendSticker("CAACAgIAAxkBAAIJlWZjLcEogQfuwNYM6z54RSFL8lBWAAIBAAP1orgb_3Txv0gPw3E1BA")
+    }
+
     @Command("chatId")
     async chatId(@Ctx() ctx: SceneContext, @Sender("id") userId: number) {
         const chatId = ctx.chat.id;

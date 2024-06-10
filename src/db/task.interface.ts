@@ -2,7 +2,7 @@ import { taskStatus } from "utils/const";
 import { TaskDocument, TaskType } from "./schemas/task.schema";
 
 export interface ITask {
-    createTasks(chatId?: number): Promise<TaskDocument> | null;
+    createTasks(chatId?: number): Promise<void>;
     createTaskForJob(jobId: string): Promise<TaskDocument>;
     setTaskStatus(taskId: string, status: taskStatus): Promise<void> | null;
     getTaskById(id: string): Promise<TaskType>;

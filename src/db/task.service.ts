@@ -14,15 +14,15 @@ export class TaskService implements ITask {
         @InjectModel("Job") private readonly jobModel: Model<Job>,
     ) {}
 
-    async createTasks(chatId?: number): Promise<TaskDocument> | null {
+    async createTasks(chatId?: number): Promise<void> {
         let jobs: JobType[] = [];
         if (!chatId) {
-            jobs = await this.jobModel.find().lean().populate("users");
+            // jobs = await this.jobModel.find().lean().populate("users");
+            jobs = await this.jobModel.find();
         } else {
-            jobs = await this.jobModel
-                .find({ chatId: chatId })
-                .lean()
-                .populate("users");
+            jobs = await this.jobModel.find({ chatId: chatId });
+            // .lean()
+            // .populate("users");
         }
         if (jobs.length === 0) {
             console.log("No items in Jobs collection");
@@ -47,9 +47,8 @@ export class TaskService implements ITask {
                 snoozedTimes: 0,
                 storyStep: "monday",
             });
-            const result = await newTask.save();
+            await newTask.save();
             console.log("New task added to db.");
-            return result;
         }
     }
 
