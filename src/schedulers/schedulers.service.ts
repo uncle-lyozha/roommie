@@ -64,8 +64,16 @@ export class SchedulersService {
         }
     }
 
-    @Cron("0 12 * * 4-6", { timeZone: "Europe/Belgrade" })
-    async repeating() {
+    @Cron("0 12 * * 3", { timeZone: "Europe/Belgrade" })
+    async wednesday() {
+        const tasks = await this.taskService.getAllPendingTasks();
+        tasks.forEach(async (task) => {
+            await this.mailman.sendMonPM(task);
+        });
+    }
+
+    @Cron("0 12 * * 5", { timeZone: "Europe/Belgrade" })
+    async friday() {
         const tasks = await this.taskService.getAllPendingTasks();
         tasks.forEach(async (task) => {
             await this.mailman.sendMonPM(task);
