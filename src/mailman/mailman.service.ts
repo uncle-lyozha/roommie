@@ -21,14 +21,22 @@ export class MailmanService {
     async notifyAllChats(tasks: TaskType[]): Promise<void> {
         tasks.forEach(async (task) => {
             const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.jobName} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
-            await this.bot.telegram.sendMessage(task.chatId, message);
+            try {
+                await this.bot.telegram.sendMessage(task.chatId, message);
+            } catch (err) {
+                throw new Error(err);
+            }
         });
     }
 
     async sendChatDutyNotification(chatId: number, tasks: TaskType[]) {
         tasks.forEach(async (task) => {
             const message = `-= Attention! =-\n-= This week ${task.userName} takes turn to do the job: ${task.jobName} =-\n\nPlease recieve the assignment and guidelines in private messages.`;
-            await this.bot.telegram.sendMessage(chatId, message);
+            try {
+                await this.bot.telegram.sendMessage(chatId, message);
+            } catch (err) {
+                throw new Error(err);
+            }
         });
     }
 
@@ -58,11 +66,19 @@ export class MailmanService {
                     inlineKeyboard.push(btn);
                 }
 
-                await this.bot.telegram.sendMessage(task.TGId, msg.text + job, {
-                    reply_markup: {
-                        inline_keyboard: inlineKeyboard,
-                    },
-                });
+                try {
+                    await this.bot.telegram.sendMessage(
+                        task.TGId,
+                        msg.text + job,
+                        {
+                            reply_markup: {
+                                inline_keyboard: inlineKeyboard,
+                            },
+                        },
+                    );
+                } catch (err) {
+                    throw new Error(err);
+                }
             }
         }
     }
@@ -74,12 +90,16 @@ export class MailmanService {
             taskId,
             taskStatus.done,
         );
-        await this.bot.telegram.sendMessage(
-            task.TGId,
-            "No more snoozes. Please make the job done.",
-            Markup.inlineKeyboard([
-                Markup.button.callback("The job is done.", payloadId),
-            ]),
-        );
+        try {
+            await this.bot.telegram.sendMessage(
+                task.TGId,
+                "No more snoozes. Please make the job done.",
+                Markup.inlineKeyboard([
+                    Markup.button.callback("The job is done.", payloadId),
+                ]),
+            );
+        } catch (err) {
+            throw new Error(err);
+        }
     }
 }
