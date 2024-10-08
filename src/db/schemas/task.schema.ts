@@ -16,6 +16,9 @@ export class Task {
     jobName: string;
 
     @Prop({ required: true })
+    jobId: string;
+
+    @Prop({ required: true })
     description: string;
 
     @Prop({ required: true })

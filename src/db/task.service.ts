@@ -34,6 +34,7 @@ export class TaskService implements ITask {
             let chatId = job.chatId;
             let TGId = user.tgId;
             let jobName = job.name;
+            let jobId = job._id;
             let description = job.description;
             let status = taskStatus.new;
             let newTask = new this.taskModel({
@@ -41,6 +42,7 @@ export class TaskService implements ITask {
                 chatId: chatId,
                 TGId: TGId,
                 jobName: jobName,
+                jobId: jobId,
                 description: description,
                 status: status,
                 date: new Date().toISOString(),
@@ -60,6 +62,7 @@ export class TaskService implements ITask {
             chatId: job.chatId,
             TGId: currentUser.tgId,
             jobName: job.name,
+            jobId: job._id,
             description: job.description,
             status: taskStatus.new,
             date: new Date().toISOString(),
