@@ -11,7 +11,7 @@ export class UpdateListeners {
 
     @On("sticker")
     async onSticker(@Ctx() ctx: Context) {
-        await ctx.reply("👍");
+        // await ctx.reply("👍");
     }
 
     @Hears("hi")

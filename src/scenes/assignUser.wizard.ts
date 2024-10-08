@@ -51,7 +51,7 @@ export class AssignUserWizard {
             await ctx.editMessageText(errMsgGeneral);
         }
         const pmMsg =
-            "New task created: \n" + newTask.jobName + " = " + newTask.userName;
+            "The user on duty has been changed: \n" + newTask.jobName + " = " + newTask.userName;
         await ctx.editMessageText(pmMsg);
         await ctx.scene.leave();
     }

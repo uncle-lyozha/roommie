@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
-@Schema({ expires: "7d" })
+@Schema({ timestamps: true }) // Enables `createdAt` and `updatedAt` fields automatically
 export class Session {
     @Prop({ required: true })
     type: string;
@@ -11,6 +11,10 @@ export class Session {
 
     @Prop({ required: true })
     option: string;
+
+    @Prop({ default: Date.now, expires: "7d" }) // TTL index with expiration after 7 days
+    createdAt: Date; // MongoDB uses this field for the TTL
 }
+
 export type TSession = HydratedDocument<Session>;
 export const SessionSchema = SchemaFactory.createForClass(Session);

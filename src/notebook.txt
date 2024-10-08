@@ -1,0 +1,154 @@
+{
+  "update_id": 396065464,
+  "my_chat_member": {
+    "chat": {
+      "id": -892251879,
+      "title": "Дикари",
+      "type": "group",
+      "all_members_are_administrators": true
+    },
+    "from": {
+      "id": 268482275,
+      "is_bot": false,
+      "first_name": "uncle Lyozha",
+      "username": "Lyozha",
+      "language_code": "en"
+    },
+    "date": 1719910633,
+    "old_chat_member": {
+      "user": {
+        "id": 7035486003,
+        "is_bot": true,
+        "first_name": "test_lyozha_bot",
+        "username": "testLyozhaBot"
+      },
+      "status": "left"
+    },
+    "new_chat_member": {
+      "user": {
+        "id": 7035486003,
+        "is_bot": true,
+        "first_name": "test_lyozha_bot",
+        "username": "testLyozhaBot"
+      },
+      "status": "member"
+    }
+  }
+},
+{
+  "update_id": 396065465,
+  "message": {
+    "message_id": 2487,
+    "from": {
+      "id": 268482275,
+      "is_bot": false,
+      "first_name": "uncle Lyozha",
+      "username": "Lyozha",
+      "language_code": "en"
+    },
+    "chat": {
+      "id": -892251879,
+      "title": "Дикари",
+      "type": "group",
+      "all_members_are_administrators": true
+    },
+    "date": 1719910633,
+    "new_chat_participant": {
+      "id": 7035486003,
+      "is_bot": true,
+      "first_name": "test_lyozha_bot",
+      "username": "testLyozhaBot"
+    },
+    "new_chat_member": {
+      "id": 7035486003,
+      "is_bot": true,
+      "first_name": "test_lyozha_bot",
+      "username": "testLyozhaBot"
+    },
+    "new_chat_members": [
+      {
+        "id": 7035486003,
+        "is_bot": true,
+        "first_name": "test_lyozha_bot",
+        "username": "testLyozhaBot"
+      }
+    ]
+  }
+}
+User with 7035486003 not found in DB.
+New user created:
+ {
+  userName: 'testLyozhaBot',
+  tgId: 7035486003,
+  _id: new ObjectId('6683c0e9362e888122b1eb59'),
+  __v: 0
+}
+{
+  "update_id": 396065466,
+  "my_chat_member": {
+    "chat": {
+      "id": -892251879,
+      "title": "Дикари",
+      "type": "group",
+      "all_members_are_administrators": true
+    },
+    "from": {
+      "id": 268482275,
+      "is_bot": false,
+      "first_name": "uncle Lyozha",
+      "username": "Lyozha",
+      "language_code": "en"
+    },
+    "date": 1719910650,
+    "old_chat_member": {
+      "user": {
+        "id": 7035486003,
+        "is_bot": true,
+        "first_name": "test_lyozha_bot",
+        "username": "testLyozhaBot"
+      },
+      "status": "member"
+    },
+    "new_chat_member": {
+      "user": {
+        "id": 7035486003,
+        "is_bot": true,
+        "first_name": "test_lyozha_bot",
+        "username": "testLyozhaBot"
+      },
+      "status": "left"
+    }
+  }
+}
+{
+  "update_id": 396065467,
+  "message": {
+    "message_id": 2489,
+    "from": {
+      "id": 268482275,
+      "is_bot": false,
+      "first_name": "uncle Lyozha",
+      "username": "Lyozha",
+      "language_code": "en"
+    },
+    "chat": {
+      "id": -892251879,
+      "title": "Дикари",
+      "type": "group",
+      "all_members_are_administrators": true
+    },
+    "date": 1719910650,
+    "left_chat_participant": {
+      "id": 7035486003,
+      "is_bot": true,
+      "first_name": "test_lyozha_bot",
+      "username": "testLyozhaBot"
+    },
+    "left_chat_member": {
+      "id": 7035486003,
+      "is_bot": true,
+      "first_name": "test_lyozha_bot",
+      "username": "testLyozhaBot"
+    }
+  }
+}

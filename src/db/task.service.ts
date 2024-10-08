@@ -182,7 +182,7 @@ export class TaskService implements ITask {
 
     async deleteAllTasksForJob(jobId: string): Promise<void> {
         await this.taskModel.deleteMany({
-            _id: jobId,
+            _id: jobId, // BUG - there should be jobId in the task scheme
             status: {
                 $in: [taskStatus.new, taskStatus.snoozed, taskStatus.pending],
             },
